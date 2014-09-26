@@ -1,0 +1,19 @@
+apply plugin: "java"
+
+sourceCompatibility= 1.8
+
+repositories {
+    mavenLocal()
+    mavenCentral()
+    maven{
+        url "https://oss.sonatype.org/content/repositories/snapshots/"
+    }
+}
+
+dependencies {
+    compile 'javax.inject:javax.inject:1'
+
+    // testing
+    testCompile "junit:junit:4.11"
+    testCompile "org.assertj:assertj-core:1.6.0"
+}
