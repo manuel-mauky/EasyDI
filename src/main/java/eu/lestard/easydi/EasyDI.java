@@ -2,13 +2,14 @@ package eu.lestard.easydi;
 
 import javax.inject.Inject;
 import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Parameter;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
 public class EasyDI {
 
+    @SuppressWarnings("unchecked")
     public <T> T getInstance(Class<T> clazz){
 
         final Constructor<?>[] constructors = clazz.getConstructors();
@@ -37,22 +38,17 @@ public class EasyDI {
             constructor = constructors[0];
         }
 
+        final Parameter[] parameters = constructor.getParameters();
+        final List<Object> arguments = Arrays.stream(parameters).map(p -> (Object)getInstance(p.getType())).collect(Collectors.toList());
+
 
         try {
-            return (T)newInstance(constructor);
+            return (T) constructor.newInstance(arguments.toArray());
         } catch (Exception e) {
+            System.out.println("e");
             e.printStackTrace();
         }
 
         throw new IllegalStateException("Something went wrong :-(");
-    }
-
-
-    /**
-     * This method is available for testing purposes. When you want to create instances with {@link java.lang.reflect.Constructor#newInstance(Object...)}
-     * of inner classes (like we are doing in our tests) you have to use the outer instance (the instance of the Test class) as first param.
-     */
-    Object newInstance(Constructor<?> constructor, Object...args) throws IllegalAccessException, InvocationTargetException, InstantiationException {
-        return constructor.newInstance(args);
     }
 }
