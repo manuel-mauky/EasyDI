@@ -1,4 +1,10 @@
 apply plugin: "java"
+apply plugin: 'sonar-runner'
+apply plugin: "jacoco"
+
+// run Sonar analysis:
+// gradle clean test sonarRunner
+
 
 sourceCompatibility= 1.8
 
