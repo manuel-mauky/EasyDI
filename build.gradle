@@ -2,11 +2,18 @@ apply plugin: "java"
 apply plugin: 'sonar-runner'
 apply plugin: "jacoco"
 
+
 // run Sonar analysis:
 // gradle clean test sonarRunner
 
+group = "eu.lestard"
+version = "0.1.0"
 
-sourceCompatibility= 1.8
+apply from: "maven_upload.gradle"
+
+
+sourceCompatibility = 1.8
+targetCompatibility = 1.8
 
 repositories {
     mavenLocal()
@@ -23,3 +30,4 @@ dependencies {
     testCompile "junit:junit:4.11"
     testCompile "org.assertj:assertj-core:1.6.0"
 }
+
