@@ -116,4 +116,14 @@ public class EasyDITest {
         assertThat(instance).isNotNull();
         assertThat(instance.dependency).isNotNull();
     }
+
+    @Test(expected = IllegalStateException.class)
+    public void fail_recursiveConstructorArguments(){
+        class Example{
+            public Example(Example example){
+            }
+        }
+
+        easyDI.getInstance(Example.class);
+    }
 }
