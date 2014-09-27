@@ -3,11 +3,13 @@ package eu.lestard.easydi;
 import javax.inject.Inject;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Parameter;
-import java.util.*;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 public class EasyDI {
-
 
     /**
      * A checklist for all class types that were requested to get instances from.
@@ -19,25 +21,29 @@ public class EasyDI {
      */
     private Set<Class> instantiableClasses = new HashSet<>();
 
-
-    @SuppressWarnings("unchecked")
-    public <T> T getInstance(Class<T> clazz){
+    /**
+     * Get an instance of the given class type.
+     *
+     * @param type the class type of which an instance is retrieved.
+     * @param <T>  the generic type of the class.
+     * @return an instance of the given type.
+     */
+    public <T> T getInstance(Class<T> type) {
 
         // If a class was already requested before...
-        if(requestedClasses.contains(clazz)){
+        if (requestedClasses.contains(type)) {
             // ... we should have been able to instantiate it in the past ...
-            if(!instantiableClasses.contains(clazz)){
+            if (!instantiableClasses.contains(type)) {
 
                 // if not, this means a cyclic dependency and is an error
                 throw new IllegalStateException("");
             }
-        }else{
+        } else {
             // if this class wasn't requested before we now add it to the checklist.
-            requestedClasses.add(clazz);
+            requestedClasses.add(type);
         }
 
-
-        final Constructor<?> constructor = findConstructor(clazz);
+        final Constructor<T> constructor = findConstructor(type);
 
         final Parameter[] parameters = constructor.getParameters();
 
@@ -47,16 +53,12 @@ public class EasyDI {
             .collect(Collectors.toList());
 
         try {
-
-            final Object newInstance = constructor.newInstance(arguments.toArray());
-            instantiableClasses.add(clazz); // mark the class as successfully instantiable.
-            return (T) newInstance;
+            final T newInstance = constructor.newInstance(arguments.toArray());
+            instantiableClasses.add(type); // mark the class as successfully instantiable.
+            return newInstance;
         } catch (Exception e) {
-            System.out.println("e");
-            e.printStackTrace();
+            throw new IllegalStateException(createErrorMessageStart(type) + "An Exception was thrown while the instantiation.", e);
         }
-
-        throw new IllegalStateException("Something went wrong :-(");
     }
 
     /**
@@ -70,37 +72,45 @@ public class EasyDI {
      * <br>
      * In all other cases an {@link java.lang.IllegalStateException} is thrown.
      *
-     * @param clazz the class of which the constructor is searched for.
-     * @param <T> the generic type of the class.
+     * @param type the class of which the constructor is searched for.
+     * @param <T>  the generic type of the class.
      * @return the constructor to use
-     *
      * @throws java.lang.IllegalStateException when no constructor can be found.
      */
-    private <T> Constructor<?> findConstructor(Class<T> clazz) {
-        final Constructor<?>[] constructors = clazz.getConstructors();
+    @SuppressWarnings("unchecked")
+    private <T> Constructor<T> findConstructor(Class<T> type) {
+        final Constructor<?>[] constructors = type.getConstructors();
 
-        if(constructors.length == 0){
-            throw new IllegalStateException("EasyDI can't create an instance of the class [" + clazz + "]. " +
+        if (constructors.length == 0) {
+            throw new IllegalStateException(createErrorMessageStart(type) +
                 "The class has no public constructor.");
         }
 
-        if(constructors.length > 1){
+        if (constructors.length > 1) {
 
             final List<Constructor<?>> constructorsWithInject = Arrays
                 .stream(constructors)
                 .filter(c -> c.isAnnotationPresent(Inject.class))
                 .collect(Collectors.toList());
 
-            if(constructorsWithInject.size() != 1){
-                throw new IllegalStateException("EasyDI can't create an instance of the class [" + clazz + "]. " +
+            if (constructorsWithInject.size() != 1) {
+                throw new IllegalStateException(createErrorMessageStart(type) +
                     "There are more than one public constructors so I don't know which to use. " +
                     "Fix this by either make only one constructor public " +
                     "or annotate exactly one constructor with the javax.inject.Inject annotation.");
             }
 
-            return constructorsWithInject.get(0);
-        }else{
-            return constructors[0];
+            // we are not modifying the constructor array so we can safely cast here.
+            return (Constructor<T>) constructorsWithInject.get(0);
+        } else {
+            return (Constructor<T>) constructors[0];
         }
+    }
+
+    /**
+     * We need this string for most error messages.
+     */
+    private String createErrorMessageStart(Class type) {
+        return "EasyDI can't create an instance of the class [" + type + "]. ";
     }
 }

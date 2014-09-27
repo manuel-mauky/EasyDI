@@ -126,4 +126,15 @@ public class EasyDITest {
 
         easyDI.getInstance(Example.class);
     }
+
+    @Test(expected = IllegalStateException.class)
+    public void fail_exceptionInConstructor(){
+        class Example{
+            public Example(){
+                throw new NullPointerException();
+            }
+        }
+
+        easyDI.getInstance(Example.class);
+    }
 }
