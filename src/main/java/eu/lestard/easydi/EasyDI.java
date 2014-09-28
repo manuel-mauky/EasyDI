@@ -24,15 +24,34 @@ public class EasyDI {
      */
     private Map<Class, Object> singletons = new HashMap<>();
 
+
+    /**
+     * This map stores the implementation type (value) that should be used for an interface type (key).
+     */
+    private Map<Class, Class> interfaceMappings = new HashMap<>();
+
     /**
      * Get an instance of the given class type.
      *
-     * @param type the class type of which an instance is retrieved.
+     * @param requestedType the class type of which an instance is retrieved.
      * @param <T>  the generic type of the class.
      * @return an instance of the given type.
      */
     @SuppressWarnings("unchecked")
-    public <T> T getInstance(Class<T> type) {
+    public <T> T getInstance(Class<T> requestedType) {
+        Class<T> type = requestedType;
+
+        if(requestedType.isInterface()){
+            if(!interfaceMappings.containsKey(requestedType)){
+                throw new IllegalStateException(createErrorMessageStart(requestedType)
+                    + "It is an interface and there was no implementation class mapping defined for this type." +
+                    "Please use the 'bindInterface' method of EasyDI to define what implementing class should be used for a given interface.");
+            }else{
+                // replace the interface type with the implementing class type.
+                type = interfaceMappings.get(requestedType);
+            }
+        }
+
 
         // If a class was already requested before...
         if (requestedClasses.contains(type)) {
@@ -126,5 +145,22 @@ public class EasyDI {
      */
     private String createErrorMessageStart(Class type) {
         return "EasyDI can't create an instance of the class [" + type + "]. ";
+    }
+
+    /**
+     * This method is used to define what implementing class should be used for a given interface.
+     * <br>
+     * This way you can use interface types as dependencies in your classes and doesn't have to
+     * depend on specific implementations.
+     * <br>
+     * But EasyDI needs to know what implementing class should be used when an interface type is
+     * defined as dependency.
+     *
+     * @param interfaceType the class type of the interface.
+     * @param implementationType the class type of the implementing class.
+     * @param <T> the generic type of the interface.
+     */
+    public <T> void bindInterface(Class<T> interfaceType, Class<? extends T> implementationType) {
+        interfaceMappings.put(interfaceType, implementationType);
     }
 }
