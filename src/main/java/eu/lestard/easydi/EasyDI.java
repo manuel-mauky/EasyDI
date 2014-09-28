@@ -1,12 +1,10 @@
 package eu.lestard.easydi;
 
 import javax.inject.Inject;
+import javax.inject.Singleton;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Parameter;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public class EasyDI {
@@ -22,12 +20,18 @@ public class EasyDI {
     private Set<Class> instantiableClasses = new HashSet<>();
 
     /**
+     * A map with all classes that are marked as singleton and the actual singleton instance.
+     */
+    private Map<Class, Object> singletons = new HashMap<>();
+
+    /**
      * Get an instance of the given class type.
      *
      * @param type the class type of which an instance is retrieved.
      * @param <T>  the generic type of the class.
      * @return an instance of the given type.
      */
+    @SuppressWarnings("unchecked")
     public <T> T getInstance(Class<T> type) {
 
         // If a class was already requested before...
@@ -43,6 +47,10 @@ public class EasyDI {
             requestedClasses.add(type);
         }
 
+        if(singletons.containsKey(type)){
+            return (T) singletons.get(type);
+        }
+
         final Constructor<T> constructor = findConstructor(type);
 
         final Parameter[] parameters = constructor.getParameters();
@@ -55,6 +63,12 @@ public class EasyDI {
         try {
             final T newInstance = constructor.newInstance(arguments.toArray());
             instantiableClasses.add(type); // mark the class as successfully instantiable.
+
+            // when the class is marked as singleton it's instance is now added to the singleton map
+            if(type.isAnnotationPresent(Singleton.class)){
+                singletons.put(type, newInstance);
+            }
+
             return newInstance;
         } catch (Exception e) {
             throw new IllegalStateException(createErrorMessageStart(type) + "An Exception was thrown while the instantiation.", e);
