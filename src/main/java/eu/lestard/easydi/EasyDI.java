@@ -23,7 +23,12 @@ public class EasyDI {
     /**
      * A map with all classes that are marked as singleton and the actual singleton instance.
      */
-    private Map<Class, Object> singletons = new HashMap<>();
+    private Map<Class, Object> singletonInstances = new HashMap<>();
+
+    /**
+     * A set of classes that are marked to be treaded as singleton even if they aren't annotated as singleton.
+     */
+    private Set<Class> singletonClasses = new HashSet<>();
 
     /**
      * This map stores the implementation type (value) that should be used for an interface type (key).
@@ -54,7 +59,7 @@ public class EasyDI {
                 return getInstanceFromProvider(requestedType);
             }else {
                 throw new IllegalStateException(createErrorMessageStart(requestedType)
-                    + "It is an interface and there was no implementation class mapping defined for this type." +
+                    + "It is an interface and there was no implementation class mapping defined for this type. " +
                     "Please use the 'bindInterface' method of EasyDI to define what implementing class should be used for a given interface.");
             }
         }
@@ -74,9 +79,9 @@ public class EasyDI {
         }
 
         // If we have an existing singleton instance for this type...
-        if(singletons.containsKey(type)){
+        if(singletonInstances.containsKey(type)){
             // ... we immediately return it.
-            return (T) singletons.get(type);
+            return (T) singletonInstances.get(type);
         }
 
 
@@ -86,7 +91,7 @@ public class EasyDI {
             markAsInstantiable(type);
 
             if(isSingleton(type)){
-                singletons.put(type, instanceFromProvider);
+                singletonInstances.put(type, instanceFromProvider);
             }
             return instanceFromProvider;
         }
@@ -142,6 +147,24 @@ public class EasyDI {
         providers.put(classType, provider);
     }
 
+
+    /**
+     * This method can be used to mark a class as singleton.
+     * <br>
+     * It is an alternative for situations when you can't use the {@link javax.inject.Singleton} annotation.
+     * For example when you want a class from a third-party library to be a singleton.
+     *
+     * @param type the type that will be marked as singleton.
+     */
+    public void markAsSingleton(Class type) {
+        if(type.isInterface()){
+            throw new IllegalArgumentException("The given type is an interface. Expecting the param to be an actual class");
+        }
+
+        singletonClasses.add(type);
+    }
+
+
     /**
      * Create a new instance of the given type.
      */
@@ -162,7 +185,7 @@ public class EasyDI {
 
             // when the class is marked as singleton it's instance is now added to the singleton map
             if(isSingleton(type)){
-                singletons.put(type, newInstance);
+                singletonInstances.put(type, newInstance);
             }
 
             return newInstance;
@@ -184,7 +207,7 @@ public class EasyDI {
      * Check if the given class type is marked as singleton.
      */
     private boolean isSingleton(Class type){
-        return type.isAnnotationPresent(Singleton.class);
+        return type.isAnnotationPresent(Singleton.class) || singletonClasses.contains(type);
     }
 
 
@@ -256,6 +279,5 @@ public class EasyDI {
     private String createErrorMessageStart(Class type) {
         return "EasyDI can't create an instance of the class [" + type + "]. ";
     }
-
 
 }
