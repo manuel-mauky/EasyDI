@@ -3,7 +3,9 @@ package eu.lestard.easydi;
 import org.junit.Before;
 import org.junit.Test;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import javax.inject.Singleton;
+
+import static org.assertj.core.api.Assertions.*;
 
 /**
  * This test is used to verify the behaviour of EasyDI dealing with interfaces.
@@ -21,6 +23,7 @@ public class InterfaceTest {
 
     public static class ExampleTwo implements A, B {
     }
+
 
     private EasyDI easyDI;
 
@@ -51,5 +54,27 @@ public class InterfaceTest {
 
         final A instance = easyDI.getInstance(A.class);
         assertThat(instance).isNotNull().isInstanceOf(ExampleTwo.class);
+    }
+
+
+
+    @Singleton
+    public static interface WannabeSingleton {}
+
+    public static class NonSingleton implements WannabeSingleton{}
+
+    /**
+     * The {@link javax.inject.Singleton} annotation is ignored when it is added to
+     * interfaces.
+     */
+    @Test
+    public void fail_interfacesCantBeMarkedAsSingleton(){
+
+        easyDI.bindInterface(WannabeSingleton.class, NonSingleton.class);
+
+        final WannabeSingleton instanceOne = easyDI.getInstance(WannabeSingleton.class);
+        final WannabeSingleton instanceTwo = easyDI.getInstance(WannabeSingleton.class);
+
+        assertThat(instanceOne).isNotSameAs(instanceTwo);
     }
 }
