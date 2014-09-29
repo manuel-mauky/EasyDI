@@ -77,4 +77,19 @@ public class InterfaceTest {
 
         assertThat(instanceOne).isNotSameAs(instanceTwo);
     }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void fail_bindInterface_paramIsNotAnInterface(){
+        easyDI.bindInterface(ExampleOne.class, ExampleOne.class);
+    }
+
+
+    public static interface SuperInterface {}
+
+    public static interface SubInterface extends SuperInterface {}
+
+    @Test(expected = IllegalArgumentException.class)
+    public void fail_bindInterface_secondParamIsInterface(){
+        easyDI.bindInterface(SuperInterface.class, SubInterface.class);
+    }
 }

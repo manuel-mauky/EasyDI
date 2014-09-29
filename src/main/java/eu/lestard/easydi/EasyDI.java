@@ -106,9 +106,19 @@ public class EasyDI {
      * @param interfaceType the class type of the interface.
      * @param implementationType the class type of the implementing class.
      * @param <T> the generic type of the interface.
+     *
+     * @throws java.lang.IllegalArgumentException if the first parameter is <b>not</b> an interface or the second parameter <b>is</b> an interface.
      */
     public <T> void bindInterface(Class<T> interfaceType, Class<? extends T> implementationType) {
-        interfaceMappings.put(interfaceType, implementationType);
+        if(interfaceType.isInterface()){
+            if(implementationType.isInterface()){
+                throw new IllegalArgumentException("The given type is an interface. Expecting the second argument to not be an interface but an actual class");
+            }else{
+                interfaceMappings.put(interfaceType, implementationType);
+            }
+        }else{
+            throw new IllegalArgumentException("The given type is not an interface. Expecting the first argument to be an interface.");
+        }
     }
 
     /**
