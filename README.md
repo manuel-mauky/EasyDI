@@ -31,7 +31,7 @@ The code for this example is located in the test source directory:
 
 ## How to Use
 
-#### 1. Add the library to your project
+### 1. Add the library to your project
  
 At the moment EasyDI is in an early alpha version. It will be published to the maven central repository in the future
 but at the moment it's only available in the Sonatype snapshot repository. 
@@ -60,7 +60,7 @@ Maven:
 </dependency>
 ```
 
-#### 2. Create your classes
+### 2. Create your classes
 
 Write your Java classes. When your class needs an instance of another class, simply add this dependency as a constructor parameter.
 
@@ -91,7 +91,7 @@ public class Engine {
 }
 ```
 
-#### 3. Use EasyDI to get instances of your classes
+### 3. Use EasyDI to get instances of your classes
 
 ```java
 import eu.lestard.easydi.EasyDI;
@@ -110,9 +110,9 @@ public class CarApp {
 
 For this simple use case EasyDI doesn't need any annotations or configuration.
 
-#### Optional Features
+### Optional Features
 
-##### Multiple Constructors
+#### Multiple Constructors
 
 When a class has more then one public constructor, you need to tell *EasyDI* which one it should use. This is 
 done with the annotation `javax.inject.Inject`:
@@ -132,7 +132,7 @@ public class Car {
 }
 ```
 
-##### Interfaces and Implementing classes
+#### Interfaces and Implementing classes
 
 EasyDI doesn't know which implementing class it should use when an interface type is requested as a dependency. 
 You have to tell it with the `easyDI.bindInterface(interfaceType, implementingType)` method.
@@ -152,12 +152,12 @@ easyDI.bindInterface(Engine.class, ElectricMotor.class);
 
 ```
 
-##### Singletons
+#### Singletons
 
 By default EasyDI will create new instances every time a dependency is requested. If you like to have only one
 instance of a specific class you have to tell it EasyDI. There are two ways of doing this:
 
-###### @Singleton
+##### @Singleton
 
 The recommended way is to use the `javax.inject.Singleton` annotation on the class that should be a singleton:
 
@@ -168,7 +168,7 @@ public class Car {
 }
 ```
 
-###### EasyDI.markAsSingleton()
+##### EasyDI.markAsSingleton()
 
 You can mark a class as singleton with the method `markAsSingleton`. This is useful when you for some reason can't 
 modify the source code of the class you want to be a singleton (i.e. when it is part of a third-party library).
@@ -180,7 +180,7 @@ easyDI.markAsSingleton(ThirdParty.class);
 ...
 ``` 
 
-##### Providers
+#### Providers
 
 If you like to inject instances of a class that doesn't meet the requirements of EasyDI you can add a `javax.inject.Provider`
 for this class. There are many use cases where this can be useful:
@@ -217,7 +217,7 @@ easyDI.bindProvider(Engine.class, ()-> {
 ```
 
 
-##### Abstract classes
+#### Abstract classes
 
 If an instance of an abstract class is requested, EasyDI can't know out of
 the box which implementing class it should use. 
@@ -229,7 +229,7 @@ far more possibilities for (miss-)configuration when it comes to (abstract) clas
 When you like to use abstract classes as dependencies you will have to create a provider for this class:
 
 
-#### Note on Circular Dependencies
+### Note on Circular Dependencies
 
 When using constructor injection without a DI framework, it isn't possible to
 create circular dependencies. Look at the following example:
