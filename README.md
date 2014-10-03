@@ -15,6 +15,19 @@ If you like to use dependency injection (which is always a good idea) but EasyDI
  you might want to try other DI frameworks like [CDI](http://www.cdi-spec.org/), [Guice](https://github.com/google/guice) 
  or [Dagger](https://square.github.io/dagger/).
 
+## Tutorial
+
+In the wiki there is a tutorial where all features of EasyDI are described. 
+In the example we are creating a coffee machine application:
+[wiki](https://github.com/lestard/EasyDI/wiki/Tutorial). 
+
+The code for this example is located in the test source directory: 
+[/src/test/java/eu/lestard/easydi/examples/coffee/](https://github.com/lestard/EasyDI/tree/master/src/test/java/eu/lestard/easydi/examples/coffee)
+
+## Real-World Examples:
+
+- [SnakeFX](https://github.com/lestard/SnakeFX): A Snake clone written in JavaFX
+- [Nonogram](https://github.com/lestard/nonogram): A nonogram puzzle game written in JavaFX
 
 ## How to Use
 
@@ -69,9 +82,11 @@ public class Car {
 
 public class Engine {
     public void start(){
+        ...
     }
 
     public void accelerate(){
+        ...
     }
 }
 ```
@@ -93,9 +108,161 @@ public class CarApp {
 }
 ```
 
+For this simple use case EasyDI doesn't need any annotations or configuration.
 
-First create an instance of `EasyDi`, then use the method `getInstance` to get an instance of your class and use it.
+#### Optional Features
 
-For this simple use case EasyDI doesn't need any annotations or configuration. This is the case when every class in
-the dependency graph defines exactly one public constructor or has no constructor at all 
-(in this case the java compiler will automatically add an implicit no-args constructor). 
+##### Multiple Constructors
+
+When a class has more then one public constructor, you need to tell *EasyDI* which one it should use. This is 
+done with the annotation `javax.inject.Inject`:
+
+```java
+public class Car {
+    ...
+    @Inject
+    public Car(Engine engine){
+        // this constructor will be used
+        ...
+    }
+    
+    public Car(){
+        ...
+    }    
+}
+```
+
+##### Interfaces and Implementing classes
+
+EasyDI doesn't know which implementing class it should use when an interface type is requested as a dependency. 
+You have to tell it with the `easyDI.bindInterface(interfaceType, implementingType)` method.
+
+```java
+public interface Engine {}
+
+public class GasolineEngine implements Engine {}
+
+public class ElectricMotor implements Engine {}
+
+
+EasyDI easyDi = new EasyDI();
+
+easyDI.bindInterface(Engine.class, ElectricMotor.class);
+...
+
+```
+
+##### Singletons
+
+By default EasyDI will create new instances every time a dependency is requested. If you like to have only one
+instance of a specific class you have to tell it EasyDI. There are two ways of doing this:
+
+###### @Singleton
+
+The recommended way is to use the `javax.inject.Singleton` annotation on the class that should be a singleton:
+
+```java
+@Singleton
+public class Car {
+...
+}
+```
+
+###### EasyDI.markAsSingleton()
+
+You can mark a class as singleton with the method `markAsSingleton`. This is useful when you for some reason can't 
+modify the source code of the class you want to be a singleton (i.e. when it is part of a third-party library).
+
+```java
+EasyDI easyDI = new EasyDI();
+
+easyDI.markAsSingleton(ThirdParty.class);
+...
+``` 
+
+##### Providers
+
+If you like to inject instances of a class that doesn't meet the requirements of EasyDI you can add a `javax.inject.Provider`
+for this class. There are many use cases where this can be useful:
+
+- There is only a factory method to get instances of this class but no constructors
+- There are no public constructor/more than one public constructors and (for some reason) you can't add the `@Inject` annotation
+- The class is implemented with the classical Singleton design pattern.
+- You need to make some configuration on the created instance before it can be used for injection.
+- When you like to use abstract classes as dependency (see next section)
+
+```java
+EasyDI easyDI = new EasyDI();
+
+easyDI.bindProvider(Engine.class, new Provider<Engine>() {
+    @Override
+    public Engine get(){
+        Engine engine = new Engine();
+        engine.configureThis();
+        engine.configureThat();
+        return engine;
+    }
+});
+```
+
+With Java 8 lambdas you would write this: 
+
+```java
+easyDI.bindProvider(Engine.class, ()-> {
+    Engine engine = new Engine();
+    engine.configureThis();
+    engine.configureThat();
+    return engine;
+});
+```
+
+
+##### Abstract classes
+
+If an instance of an abstract class is requested, EasyDI can't know out of
+the box which implementing class it should use. 
+
+This is the same situation as with interfaces. Unlike interfaces at the moment there is no
+explicit way of defining a binding for abstract classes. The reason is that there are
+far more possibilities for (miss-)configuration when it comes to (abstract) class bindings.
+
+When you like to use abstract classes as dependencies you will have to create a provider for this class:
+
+
+#### Note on Circular Dependencies
+
+When using constructor injection without a DI framework, it isn't possible to
+create circular dependencies. Look at the following example:
+
+```java
+public class A {
+    public A (B b){}
+}
+
+public class B {
+    public B (C c){}
+}
+ 
+public class C {
+    public C (A a){}
+}
+```
+
+You can't instantiate any of these classes with `new` because you can't provide the needed 
+constructor params (except you pass `null` as constructor param).
+
+The same is true for EasyDI. If you try to get an instance of one of these classes you will 
+get an `IllegalStageException`:
+
+```java
+EasyDI easyDI = new EasyDI();
+
+easyDI.getInstance(A.class); // IllegalStateException
+```
+
+Creating circular dependencies is generally a bad idea because it leads to tight coupling.
+While other DI frameworks can circumvent this by creating proxy classes, EasyDI won't! 
+Instead you have to fix your dependency graph.
+
+   
+    

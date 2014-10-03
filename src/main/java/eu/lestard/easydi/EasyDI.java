@@ -121,7 +121,7 @@ public class EasyDI {
      *
      * <strong>Hint:</strong> The second parameter has to be an actual implementing class of the interface.
      * It may not be an abstract class!
-     * 
+     *
      *
      * @param interfaceType the class type of the interface.
      * @param implementationType the class type of the implementing class.
