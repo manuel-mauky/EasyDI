@@ -4,6 +4,7 @@ import javax.inject.Inject;
 import javax.inject.Provider;
 import javax.inject.Singleton;
 import java.lang.reflect.Constructor;
+import java.lang.reflect.Modifier;
 import java.lang.reflect.Parameter;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -64,6 +65,15 @@ public class EasyDI {
             }
         }
 
+        if(isAbstractClass(requestedType)){
+            if(providers.containsKey(requestedType)){
+                return getInstanceFromProvider(requestedType);
+            }else{
+                throw new IllegalStateException(createErrorMessageStart(requestedType)
+                + "It is an abstract class and there is no provider for this class available. " +
+                    "Please define a provider with the `bindProvider` method for this abstract class type.");
+            }
+        }
 
         // If a class was already requested before...
         if (requestedClasses.contains(type)) {
@@ -107,18 +117,25 @@ public class EasyDI {
      * <br>
      * But EasyDI needs to know what implementing class should be used when an interface type is
      * defined as dependency.
+     * <br>
+     *
+     * <strong>Hint:</strong> The second parameter has to be an actual implementing class of the interface.
+     * It may not be an abstract class!
+     * 
      *
      * @param interfaceType the class type of the interface.
      * @param implementationType the class type of the implementing class.
      * @param <T> the generic type of the interface.
      *
-     * @throws java.lang.IllegalArgumentException if the first parameter is <b>not</b> an interface or the second parameter <b>is</b> an interface.
+     * @throws java.lang.IllegalArgumentException if the first parameter is <b>not</b> an interface or the second parameter <b>is</b> an interface or an abstract class.
      */
     public <T> void bindInterface(Class<T> interfaceType, Class<? extends T> implementationType) {
         if(interfaceType.isInterface()){
             if(implementationType.isInterface()){
                 throw new IllegalArgumentException("The given type is an interface. Expecting the second argument to not be an interface but an actual class");
-            }else{
+            }else if(isAbstractClass(implementationType)) {
+                throw new IllegalArgumentException("The given type is an abstract class. Expecting the second argument to be an actual implementing class");
+            }else {
                 interfaceMappings.put(interfaceType, implementationType);
             }
         }else{
@@ -164,6 +181,17 @@ public class EasyDI {
         singletonClasses.add(type);
     }
 
+
+    /**
+     * This helper method returns <code>true</code> only if the given
+     * class type is an abstract class.
+     *
+     * @param type the class type to check
+     * @return <code>true</code> if the given type is an abstract class, otherwise <code>false</code>
+     */
+    static boolean isAbstractClass(Class type){
+        return !type.isInterface() && Modifier.isAbstract(type.getModifiers());
+    }
 
     /**
      * Create a new instance of the given type.

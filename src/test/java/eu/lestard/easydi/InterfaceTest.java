@@ -92,4 +92,12 @@ public class InterfaceTest {
     public void fail_bindInterface_secondParamIsInterface(){
         easyDI.bindInterface(SuperInterface.class, SubInterface.class);
     }
+
+
+    public static abstract class AbstractA implements A {}
+
+    @Test(expected = IllegalArgumentException.class)
+    public void fail_bindInterface_secondParamIsAbstractClass(){
+        easyDI.bindInterface(A.class, AbstractA.class);
+    }
 }

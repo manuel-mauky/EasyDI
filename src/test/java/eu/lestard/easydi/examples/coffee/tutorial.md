@@ -465,7 +465,7 @@ easyDI.bindProvider(BeanContainer.class, () -> {
         final BeanContainer beanContainer = new BeanContainer();
         beanContainer.setAmount(100);
         return beanContainer;
-    });;
+    });
 }
 ```
 
