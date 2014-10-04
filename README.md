@@ -15,6 +15,11 @@ To be as easy as possible EasyDI has less features compared to other DI framewor
 If you like to use dependency injection (which is always a good idea) but EasyDI doesn't fit your needs
  you might want to try other DI frameworks like [CDI](http://www.cdi-spec.org/), [Guice](https://github.com/google/guice) 
  or [Dagger](https://square.github.io/dagger/).
+ 
+## Links
+
+[JavaDoc 0.1.0](https://lestard.github.io/EasyDI/docs/0.1.0/eu/lestard/easydi/EasyDI.html)
+
 
 ## Tutorial
 
