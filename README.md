@@ -10,6 +10,7 @@ To be as easy as possible EasyDI has less features compared to other DI framewor
 - Only constructor injection is supported, **no** setter/field injection
 - No `PostConstruct` or `PreDestroy`
 - Uses some JSR-330 annotations (`javax.inject.*`) but is **not** a compliant implementation of JSR-330
+- Java 8 only
 
 If you like to use dependency injection (which is always a good idea) but EasyDI doesn't fit your needs
  you might want to try other DI frameworks like [CDI](http://www.cdi-spec.org/), [Guice](https://github.com/google/guice) 

@@ -9,6 +9,17 @@ import java.lang.reflect.Parameter;
 import java.util.*;
 import java.util.stream.Collectors;
 
+/**
+ * EasyDI main class.
+ *
+ * A typical usage looks like this:
+ *
+ * ```java
+ * EasyDI easyDI = new EasyDI();
+ *
+ * MyClass instance = easyDI.getInstance(MyClass.class);
+ * ```
+ */
 public class EasyDI {
 
     /**
@@ -111,15 +122,15 @@ public class EasyDI {
 
     /**
      * This method is used to define what implementing class should be used for a given interface.
-     * <br>
+     *
      * This way you can use interface types as dependencies in your classes and doesn't have to
      * depend on specific implementations.
-     * <br>
+     *
      * But EasyDI needs to know what implementing class should be used when an interface type is
      * defined as dependency.
-     * <br>
      *
-     * <strong>Hint:</strong> The second parameter has to be an actual implementing class of the interface.
+     *
+     * **Hint:** The second parameter has to be an actual implementing class of the interface.
      * It may not be an abstract class!
      *
      *
@@ -145,12 +156,12 @@ public class EasyDI {
 
     /**
      * This method is used to define a {@link javax.inject.Provider} for a given type.
-     * <br>
+     *
      * The type can either be an interface or class type. This is a good way to integrate
      * third-party classes that aren't suitable for injection by default (i.e. have no public constructor...).
-     * <br>
+     *
      * Another use-case is when you need to make some configuration for new instance before it is used for dependency injection.
-     * <br>
+     *
      *
      * Providers can be combined with {@link javax.inject.Singleton}'s.
      * When a type is marked as singleton (has the annotation {@link javax.inject.Singleton} and there is a provider
@@ -167,7 +178,7 @@ public class EasyDI {
 
     /**
      * This method can be used to mark a class as singleton.
-     * <br>
+     *
      * It is an alternative for situations when you can't use the {@link javax.inject.Singleton} annotation.
      * For example when you want a class from a third-party library to be a singleton.
      *
@@ -183,11 +194,11 @@ public class EasyDI {
 
 
     /**
-     * This helper method returns <code>true</code> only if the given
+     * This helper method returns `true` only if the given
      * class type is an abstract class.
      *
      * @param type the class type to check
-     * @return <code>true</code> if the given type is an abstract class, otherwise <code>false</code>
+     * @return `true` if the given type is an abstract class, otherwise `false`
      */
     static boolean isAbstractClass(Class type){
         return !type.isInterface() && Modifier.isAbstract(type.getModifiers());
@@ -257,13 +268,13 @@ public class EasyDI {
 
     /**
      * Find out the constructor that will be used for instantiation.
-     * <br>
+     *
      * If there is only one public constructor, it will be used.
-     * <br>
+     *
      * If there are more then one public constructors, the one with an {@link javax.inject.Inject}
      * annotation is used.
      *
-     * <br>
+     *
      * In all other cases an {@link java.lang.IllegalStateException} is thrown.
      *
      * @param type the class of which the constructor is searched for.
