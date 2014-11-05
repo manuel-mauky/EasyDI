@@ -3,8 +3,12 @@ apply plugin: 'sonar-runner'
 apply plugin: "jacoco"
 
 
+task wrapper(type: Wrapper) {
+    gradleVersion = '2.2-rc-2'
+}
+
 // run Sonar analysis:
-// gradle clean test sonarRunner
+// ./gradlew clean test sonarRunner
 
 group = "eu.lestard"
 version = "0.2.0"
