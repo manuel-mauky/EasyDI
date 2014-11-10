@@ -1,7 +1,7 @@
 This tutorial will show you the usage of Easy-DI. 
 
 Let's assume this class diagram for a coffee machine application: 
-*todo add class diagram*
+![uml-class-diagram](./classdiagram1.png)
 
 In this class diagram we can see the dependencies of each class:
 The `CoffeeMachine` has a reference to the `WaterTank` and the `CoffeePowderProvider`.
@@ -70,7 +70,7 @@ public class CoffeeMachine {
     }
 }
 ```
-Now we have all our "business" classes finished. The only thing that is missing is a class with a `main` method to start our programm. In the main method we need to create all our instances and put them together: 
+Now we have all our "business" classes finished. The only thing that is missing is a class with a `main` method to start our program. In the main method we need to create all our instances and put them together:
 
 ```java
 public class CoffeeApp {
