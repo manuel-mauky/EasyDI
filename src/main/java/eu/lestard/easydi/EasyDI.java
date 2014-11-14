@@ -3,9 +3,7 @@ package eu.lestard.easydi;
 import javax.inject.Inject;
 import javax.inject.Provider;
 import javax.inject.Singleton;
-import java.lang.reflect.Constructor;
-import java.lang.reflect.Modifier;
-import java.lang.reflect.Parameter;
+import java.lang.reflect.*;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -56,32 +54,32 @@ public class EasyDI {
      * Get an instance of the given class type.
      *
      * @param requestedType the class type of which an instance is retrieved.
-     * @param <T>  the generic type of the class.
+     * @param <T>           the generic type of the class.
      * @return an instance of the given type.
      */
     @SuppressWarnings("unchecked")
     public <T> T getInstance(Class<T> requestedType) {
         Class<T> type = requestedType;
 
-        if(requestedType.isInterface()){
+        if (requestedType.isInterface()) {
             if (interfaceMappings.containsKey(requestedType)) {
                 // replace the interface type with the implementing class type.
                 type = interfaceMappings.get(requestedType);
-            } else if(providers.containsKey(requestedType)) {
+            } else if (providers.containsKey(requestedType)) {
                 return getInstanceFromProvider(requestedType);
-            }else {
+            } else {
                 throw new IllegalStateException(createErrorMessageStart(requestedType)
                     + "It is an interface and there was no implementation class mapping defined for this type. " +
                     "Please use the 'bindInterface' method of EasyDI to define what implementing class should be used for a given interface.");
             }
         }
 
-        if(isAbstractClass(requestedType)){
-            if(providers.containsKey(requestedType)){
+        if (isAbstractClass(requestedType)) {
+            if (providers.containsKey(requestedType)) {
                 return getInstanceFromProvider(requestedType);
-            }else{
+            } else {
                 throw new IllegalStateException(createErrorMessageStart(requestedType)
-                + "It is an abstract class and there is no provider for this class available. " +
+                    + "It is an abstract class and there is no provider for this class available. " +
                     "Please define a provider with the `bindProvider` method for this abstract class type.");
             }
         }
@@ -100,18 +98,17 @@ public class EasyDI {
         }
 
         // If we have an existing singleton instance for this type...
-        if(singletonInstances.containsKey(type)){
+        if (singletonInstances.containsKey(type)) {
             // ... we immediately return it.
             return (T) singletonInstances.get(type);
         }
 
-
         // check if there is a provider available
-        if(providers.containsKey(type)){
+        if (providers.containsKey(type)) {
             final T instanceFromProvider = getInstanceFromProvider(type);
             markAsInstantiable(type);
 
-            if(isSingleton(type)){
+            if (isSingleton(type)) {
                 singletonInstances.put(type, instanceFromProvider);
             }
             return instanceFromProvider;
@@ -133,23 +130,22 @@ public class EasyDI {
      * **Hint:** The second parameter has to be an actual implementing class of the interface.
      * It may not be an abstract class!
      *
-     *
-     * @param interfaceType the class type of the interface.
+     * @param interfaceType      the class type of the interface.
      * @param implementationType the class type of the implementing class.
-     * @param <T> the generic type of the interface.
-     *
-     * @throws java.lang.IllegalArgumentException if the first parameter is <b>not</b> an interface or the second parameter <b>is</b> an interface or an abstract class.
+     * @param <T>                the generic type of the interface.
+     * @throws java.lang.IllegalArgumentException if the first parameter is <b>not</b> an interface or the second
+     *                                            parameter <b>is</b> an interface or an abstract class.
      */
     public <T> void bindInterface(Class<T> interfaceType, Class<? extends T> implementationType) {
-        if(interfaceType.isInterface()){
-            if(implementationType.isInterface()){
+        if (interfaceType.isInterface()) {
+            if (implementationType.isInterface()) {
                 throw new IllegalArgumentException("The given type is an interface. Expecting the second argument to not be an interface but an actual class");
-            }else if(isAbstractClass(implementationType)) {
+            } else if (isAbstractClass(implementationType)) {
                 throw new IllegalArgumentException("The given type is an abstract class. Expecting the second argument to be an actual implementing class");
-            }else {
+            } else {
                 interfaceMappings.put(interfaceType, implementationType);
             }
-        }else{
+        } else {
             throw new IllegalArgumentException("The given type is not an interface. Expecting the first argument to be an interface.");
         }
     }
@@ -160,16 +156,18 @@ public class EasyDI {
      * The type can either be an interface or class type. This is a good way to integrate
      * third-party classes that aren't suitable for injection by default (i.e. have no public constructor...).
      *
-     * Another use-case is when you need to make some configuration for new instance before it is used for dependency injection.
+     * Another use-case is when you need to make some configuration for new instance before it is used for dependency
+     * injection.
      *
      *
      * Providers can be combined with {@link javax.inject.Singleton}'s.
      * When a type is marked as singleton (has the annotation {@link javax.inject.Singleton} and there is a provider
-     * defined for this type, then this provider will only executed exactly one time when the type is requested the first time.
+     * defined for this type, then this provider will only executed exactly one time when the type is requested the
+     * first time.
      *
      * @param classType the type of the class for which the provider is used.
-     * @param provider the provider that will be called to get an instance of the given type.
-     * @param <T> the generic type of the class/interface.
+     * @param provider  the provider that will be called to get an instance of the given type.
+     * @param <T>       the generic type of the class/interface.
      */
     public <T> void bindProvider(Class<T> classType, Provider<T> provider) {
         providers.put(classType, provider);
@@ -185,7 +183,7 @@ public class EasyDI {
      * @param type the type that will be marked as singleton.
      */
     public void markAsSingleton(Class type) {
-        if(type.isInterface()){
+        if (type.isInterface()) {
             throw new IllegalArgumentException("The given type is an interface. Expecting the param to be an actual class");
         }
 
@@ -200,7 +198,7 @@ public class EasyDI {
      * @param type the class type to check
      * @return `true` if the given type is an abstract class, otherwise `false`
      */
-    static boolean isAbstractClass(Class type){
+    static boolean isAbstractClass(Class type) {
         return !type.isInterface() && Modifier.isAbstract(type.getModifiers());
     }
 
@@ -214,7 +212,13 @@ public class EasyDI {
 
         // recursively get of all constructor arguments
         final List<Object> arguments = Arrays.stream(parameters)
-            .map(p -> (Object) getInstance(p.getType()))
+            .map(param -> {
+                if (param.getType().equals(Provider.class)) {
+                    return getProviderArgument(param, type);
+                } else {
+                    return (Object) getInstance(param.getType());
+                }
+            })
             .collect(Collectors.toList());
 
         try {
@@ -223,7 +227,7 @@ public class EasyDI {
             markAsInstantiable(type);
 
             // when the class is marked as singleton it's instance is now added to the singleton map
-            if(isSingleton(type)){
+            if (isSingleton(type)) {
                 singletonInstances.put(type, newInstance);
             }
 
@@ -234,10 +238,33 @@ public class EasyDI {
     }
 
     /**
+     * This method is used to create a {@link javax.inject.Provider} instance when such a provider
+     * is declared as constructor parameter.
+     *
+     * @param param         the parameter declared by the constructor
+     * @param requestedType the type that was requested by the user. This is used to generate a proper error messages.
+     * @return the created provider.
+     */
+    private Provider getProviderArgument(Parameter param, Class requestedType) {
+        if (param.getParameterizedType() instanceof ParameterizedType) {
+            ParameterizedType typeParam = (ParameterizedType) param.getParameterizedType();
+
+            final Type providerType = typeParam.getActualTypeArguments()[0];
+
+            return () -> EasyDI.this.getInstance((Class) providerType);
+        } else {
+            throw new IllegalStateException(createErrorMessageStart(requestedType) +
+                "There is a javax.inject.Provider without a type parameter declared as dependency. "
+                + "When using javax.inject.Provider as dependency "
+                + "you need to define a type parameter for this provider!");
+        }
+    }
+
+    /**
      * Mark the given type as instantiable.
      */
-    private void markAsInstantiable(Class type){
-        if(!instantiableClasses.contains(type)){
+    private void markAsInstantiable(Class type) {
+        if (!instantiableClasses.contains(type)) {
             instantiableClasses.add(type);
         }
     }
@@ -245,22 +272,23 @@ public class EasyDI {
     /**
      * Check if the given class type is marked as singleton.
      */
-    private boolean isSingleton(Class type){
+    private boolean isSingleton(Class type) {
         return type.isAnnotationPresent(Singleton.class) || singletonClasses.contains(type);
     }
 
 
     /**
-     * Get an instance of the given type from a provider. This method takes care for Exception handling when the provider
+     * Get an instance of the given type from a provider. This method takes care for Exception handling when the
+     * provider
      * throws an exception.
      */
     @SuppressWarnings("unchecked")
-    private <T> T getInstanceFromProvider(Class<T> type){
-        try{
+    private <T> T getInstanceFromProvider(Class<T> type) {
+        try {
             final Provider<T> provider = providers.get(type);
 
             return provider.get();
-        } catch(Exception e){
+        } catch (Exception e) {
             throw new IllegalStateException(createErrorMessageStart(type) + "An Exception was thrown by the provider.", e);
         }
 
