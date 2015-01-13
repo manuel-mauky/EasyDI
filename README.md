@@ -189,10 +189,12 @@ public class ElectricMotor implements Engine {}
 
 
 EasyDI easyDi = new EasyDI();
-
 easyDI.bindInterface(Engine.class, ElectricMotor.class);
 ...
 
+final Engine engine = easyDI.getInstance(Engine.class);
+
+assertThat(engine).isInstanceOf(ElectricMotor.class);
 ```
 
 #### Singletons
@@ -200,7 +202,7 @@ easyDI.bindInterface(Engine.class, ElectricMotor.class);
 By default EasyDI will create new instances every time a dependency is requested. If you like to have only one
 instance of a specific class you have to tell it EasyDI. There are two ways of doing this:
 
-##### @Singleton
+##### 1. @Singleton
 
 The recommended way is to use the `javax.inject.Singleton` annotation on the class that should be a singleton:
 
@@ -211,7 +213,7 @@ public class Car {
 }
 ```
 
-##### EasyDI.markAsSingleton()
+##### 2. EasyDI.markAsSingleton()
 
 You can mark a class as singleton with the method `markAsSingleton`. This is useful when you for some reason can't
 modify the source code of the class you want to be a singleton (i.e. when it is part of a third-party library).
@@ -229,8 +231,8 @@ If you like to inject instances of a class that doesn't meet the requirements of
 for this class. There are many use cases where this can be useful:
 
 - There is only a factory method to get instances of this class but no constructors
-- There are no public constructor/more than one public constructors and (for some reason) you can't add the `@Inject` annotation
-- The class is implemented with the classical Singleton design pattern.
+- There is no public constructor or there are more than one public constructors and (for some reason) you can't add the `@Inject` annotation
+- The class is implemented with the [classical Singleton design pattern](https://en.wikipedia.org/wiki/Singleton_pattern#Example).
 - You need to make some configuration on the created instance before it can be used for injection.
 - When you like to use abstract classes as dependency (see next section)
 
@@ -269,7 +271,49 @@ This is the same situation as with interfaces. Unlike interfaces at the moment t
 explicit way of defining a binding for abstract classes. The reason is that there are
 far more possibilities for (miss-)configuration when it comes to (abstract) class bindings.
 
-When you like to use abstract classes as dependencies you will have to create a provider for this class:
+When you like to use abstract classes as dependencies you will have to [create a provider](#providers) for this class.
+
+
+#### Lazy injection / lazy instantiation
+
+In some use cases you need an instance of a class but at the time your constructor is called
+this dependency isn't yet available for some reason or it shouldn't be instantiated at this time.
+Instead you like to retrieve the instance at some later point in time.
+
+Another similar use case is when you need a dependency only under some conditions and the construction of the dependency is expensive.
+
+In both cases **lazy injection** is your friend. Easy-DI can do lazy injection like this:
+
+1. change the type of the constructor parameter from `T` to `javax.inject.Provider<T>`
+2. call the method `get` on the provider instance when you need the actual instance
+
+Example:
+
+```java
+
+public class Car {
+
+    private Provider<Engine> engineProvider;
+
+    public Car(Provider<Engine> engineProvider){
+        this.engineProvider = engineProvider;
+    }
+
+    public void buildCar(){
+        Engine engine =  engineProvider.get();
+
+        ...
+    }
+```
+
+In this example the instance of the `Engine` is only created when the `buildCar` method is called. In this
+case the normal dependency injection mechanism of Easy-DI with all configuration rules described above
+will run and retrieve an instance of `Engine`.
+
+**Recommendation**:
+In general lazy injection should only be the last choice when you really can't inject an instance directly in the constructor.
+With lazy injection it's likely that it will be harder to reason about your code. It's not trivial anymore to tell at which
+point in time an instance of your class will be created.
 
 
 ### Note on Circular Dependencies
@@ -305,4 +349,4 @@ easyDI.getInstance(A.class); // IllegalStateException
 
 Creating circular dependencies is generally a bad idea because it leads to tight coupling.
 While other DI frameworks can circumvent this by creating proxy classes, EasyDI won't!
-Instead you have to fix your dependency graph.
+Instead you have to [fix your dependency graph](http://misko.hevery.com/2008/08/01/circular-dependency-in-constructors-and-dependency-injection/).
