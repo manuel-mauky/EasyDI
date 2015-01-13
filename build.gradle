@@ -11,7 +11,7 @@ task wrapper(type: Wrapper) {
 // ./gradlew clean test sonarRunner
 
 group = "eu.lestard"
-version = "0.2.0"
+version = "0.3.0"
 
 apply from: "maven_upload.gradle"
 
