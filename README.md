@@ -357,7 +357,7 @@ public class Example {
 - It may be harder to reason about your EasyDI configuration as it's now possible make configurations in other classes too
 - You have a Dependency (`import`) to the EasyDI library in your business code.
 This makes it harder to change the dependency library afterwards.
-- If you forget the `bindProvider` configuration you will get a new context instance injected everytime as the `EasyDI` class isn't marked as singleton. This has ceveral consequences: 
+- If you forget the `bindProvider` configuration you will get a new context instance injected everytime as the `EasyDI` class isn't marked as singleton. This has several consequences: 
   - The new instance of EasyDI has no configuration. It's a totally different instance as the root context. NO configuration will be inherited from the root context.
   - The scope of the singleton configuration is limited to a single context. When there are two contexts it's possible that there two instances of a class that was marked as singleton in your application!
 
