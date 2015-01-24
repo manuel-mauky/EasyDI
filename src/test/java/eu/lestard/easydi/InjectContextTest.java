@@ -4,7 +4,6 @@ import org.junit.Before;
 import org.junit.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.fail;
 
 public class InjectContextTest {
 	
@@ -22,14 +21,17 @@ public class InjectContextTest {
         }
 
         class Example {
-            Context context;
+            EasyDI context;
             Dep dep;
 
-            public Example(Context context){
+            public Example(EasyDI context){
                 this.context = context;
                 this.dep = context.getInstance(Dep.class);
             }
         }
+
+
+        easyDI.bindProvider(EasyDI.class, ()-> easyDI);
 
 
         final Example instance = easyDI.getInstance(Example.class);
@@ -41,22 +43,12 @@ public class InjectContextTest {
     }
 
     @Test
-    public void success_context_cannot_be_casted_to_EasyDI(){
-        final Context context = easyDI.getInstance(Context.class);
-        assertThat(context).isNotInstanceOf(EasyDI.class);
-
-        try{
-            EasyDI castedEasyDI = (EasyDI) context;
-            fail("A ClassCastException was expected!");
-        }catch (ClassCastException exception){
-            // expected
-        }
-    }
-
-    @Test
     public void success_context_is_a_singleton(){
-        final Context context1 = easyDI.getInstance(Context.class);
-        final Context context2 = easyDI.getInstance(Context.class);
+
+        easyDI.bindProvider(EasyDI.class, ()-> easyDI);
+
+        final EasyDI context1 = easyDI.getInstance(EasyDI.class);
+        final EasyDI context2 = easyDI.getInstance(EasyDI.class);
 
         assertThat(context1).isSameAs(context2);
     }
@@ -65,10 +57,12 @@ public class InjectContextTest {
     public void fail_endless_recursive_injection(){
 
         class Example {
-            public Example(Context context){
+            public Example(EasyDI context){
                 context.getInstance(Example.class);
             }
         }
+
+        easyDI.bindProvider(EasyDI.class, ()-> easyDI);
 
         easyDI.getInstance(Example.class);
     }

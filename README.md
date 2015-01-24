@@ -350,3 +350,51 @@ easyDI.getInstance(A.class); // IllegalStateException
 Creating circular dependencies is generally a bad idea because it leads to tight coupling.
 While other DI frameworks can circumvent this by creating proxy classes, EasyDI won't!
 Instead you have to [fix your dependency graph](http://misko.hevery.com/2008/08/01/circular-dependency-in-constructors-and-dependency-injection/).
+
+
+### Inject EasyDI context
+
+In some use cases you like to have access to the EasyDI instance in one of your
+classes to be able to get other instances at runtime.
+
+To achieve this use this config:
+
+```
+EasyDI context = new EasyDI();
+context.bindProvider(EasyDI.class, ()-> context);
+```
+
+Then you can inject `EasyDI` in you classes:
+
+
+```
+Example.java:
+
+public class Example {
+
+    private EasyDI context;
+
+    public Example(EasyDI context){
+        this.context = context;
+    }
+
+    public void doSomething(){
+        Other other = context.getInstance(Other.class);
+        ...
+    }
+}
+
+```
+
+
+**Be aware that there are some drawbacks with this approach:**
+
+- It's harder to reason about your code because the instantiation of classes may be delayed.
+- It may be harder to reason about your EasyDI configuration as it's now possible make configurations in other classes too
+- You have a Dependency (`import`) to the EasyDI library in your business code.
+This makes it harder to change the dependency library afterwards.
+
+**Therefore it's generally not recommended to inject `EasyDÌ` in your classes**. It should only be the last choice when there
+is no other option for your use case.
+
+

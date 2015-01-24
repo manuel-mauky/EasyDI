@@ -18,7 +18,7 @@ import java.util.stream.Collectors;
  * MyClass instance = easyDI.getInstance(MyClass.class);
  * ```
  */
-public class EasyDI implements Context{
+public class EasyDI{
 
     /**
      * A checklist for all class types that were requested to get instances from.
@@ -50,12 +50,6 @@ public class EasyDI implements Context{
      */
     private Map<Class, Provider> providers = new HashMap<>();
 
-    public EasyDI(){
-        Context context = EasyDI.this::getInstance;
-
-        this.bindProvider(Context.class, ()-> context);
-    }
-
     /**
      * Get an instance of the given class type.
      *
@@ -64,7 +58,6 @@ public class EasyDI implements Context{
      * @return an instance of the given type.
      */
     @SuppressWarnings("unchecked")
-    @Override
     public <T> T getInstance(Class<T> requestedType) {
         Class<T> type = requestedType;
 
