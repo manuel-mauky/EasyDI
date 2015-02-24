@@ -56,66 +56,123 @@ public class EasyDI{
      * @param requestedType the class type of which an instance is retrieved.
      * @param <T>           the generic type of the class.
      * @return an instance of the given type.
+     *
+     * @throws java.lang.IllegalArgumentException if there is a misconfiguration or a requested class can't be instantiated.
      */
     @SuppressWarnings("unchecked")
     public <T> T getInstance(Class<T> requestedType) {
-        Class<T> type = requestedType;
-
-        if (requestedType.isInterface()) {
-            if (interfaceMappings.containsKey(requestedType)) {
-                // replace the interface type with the implementing class type.
-                type = interfaceMappings.get(requestedType);
-            } else if (providers.containsKey(requestedType)) {
-                return getInstanceFromProvider(requestedType);
-            } else {
-                throw new IllegalStateException(createErrorMessageStart(requestedType)
-                    + "It is an interface and there was no implementation class mapping defined for this type. " +
-                    "Please use the 'bindInterface' method of EasyDI to define what implementing class should be used for a given interface.");
-            }
-        }
-
-        if (isAbstractClass(requestedType)) {
-            if (providers.containsKey(requestedType)) {
-                return getInstanceFromProvider(requestedType);
-            } else {
-                throw new IllegalStateException(createErrorMessageStart(requestedType)
-                    + "It is an abstract class and there is no provider for this class available. " +
-                    "Please define a provider with the `bindProvider` method for this abstract class type.");
-            }
-        }
-
-        // If a class was already requested before...
-        if (requestedClasses.contains(type)) {
-            // ... we should have been able to instantiate it in the past ...
-            if (!instantiableClasses.contains(type)) {
-
-                // if not, this means a cyclic dependency and is an error
-                throw new IllegalStateException("");
-            }
-        } else {
-            // if this class wasn't requested before we now add it to the checklist.
-            requestedClasses.add(type);
-        }
-
-        // If we have an existing singleton instance for this type...
-        if (singletonInstances.containsKey(type)) {
-            // ... we immediately return it.
-            return (T) singletonInstances.get(type);
-        }
-
-        // check if there is a provider available
-        if (providers.containsKey(type)) {
-            final T instanceFromProvider = getInstanceFromProvider(type);
-            markAsInstantiable(type);
-
-            if (isSingleton(type)) {
-                singletonInstances.put(type, instanceFromProvider);
-            }
-            return instanceFromProvider;
-        }
-
-        return createNewInstance(type);
+        return getInstance(requestedType, null);
     }
+
+
+    @SuppressWarnings("unchecked")
+    private <T> T getInstance(Class<T> requestedType, Class<?> parent){
+        try {
+            Class<T> type = requestedType;
+
+            if (requestedType.isInterface()) {
+                if (interfaceMappings.containsKey(requestedType)) {
+                    // replace the interface type with the implementing class type.
+                    type = interfaceMappings.get(requestedType);
+                } else if (providers.containsKey(requestedType)) {
+                    return getInstanceFromProvider(requestedType);
+                } else {
+                    throw new EasyDiException(createErrorMessageStart(requestedType)
+                            + "It is an interface and there was no implementation class mapping defined for this type. " +
+                            "Please use the 'bindInterface' method of EasyDI to define what implementing class should be used for a given interface.");
+                }
+            }
+
+            if (isAbstractClass(requestedType)) {
+                if (providers.containsKey(requestedType)) {
+                    return getInstanceFromProvider(requestedType);
+                } else {
+                    throw new EasyDiException(createErrorMessageStart(requestedType)
+                            + "It is an abstract class and there is no provider for this class available. " +
+                            "Please define a provider with the `bindProvider` method for this abstract class type.");
+                }
+            }
+
+            // If a class was already requested before...
+            if (requestedClasses.contains(type)) {
+                // ... we should have been able to instantiate it in the past ...
+                if (!instantiableClasses.contains(type)) {
+
+                    // if not, this means a cyclic dependency and is an error
+                    throw new EasyDiException(createErrorMessageStart(type) + "A cyclic dependency was detected.");
+                }
+            } else {
+                // if this class wasn't requested before we now add it to the checklist.
+                requestedClasses.add(type);
+            }
+
+            // If we have an existing singleton instance for this type...
+            if (singletonInstances.containsKey(type)) {
+                // ... we immediately return it.
+                return (T) singletonInstances.get(type);
+            }
+
+            // check if there is a provider available
+            if (providers.containsKey(type)) {
+                final T instanceFromProvider = getInstanceFromProvider(type);
+                markAsInstantiable(type);
+
+                if (isSingleton(type)) {
+                    singletonInstances.put(type, instanceFromProvider);
+                }
+                return instanceFromProvider;
+            }
+
+            return createNewInstance(type, parent);
+        }catch (EasyDiException rootCause){
+            String errorMessage = "EasyDI wasn't able to create your class hierarchy. ";
+
+            if(parent != null) {
+                errorMessage += "\nCannot instantiate the class [" + parent.getName() + "]. "
+                        +"At least one of the constructor parameters of type [" + requestedType + "] can't be instantiated. ";
+            }
+            errorMessage += "See the root cause exception for a detailed explanation.";
+
+            throw new IllegalStateException(errorMessage, rootCause);
+        }
+    }
+
+    /**
+     * Create a new instance of the given type.
+     */
+    private <T> T createNewInstance(Class<T> type, Class<?> parent) {
+            final Constructor<T> constructor = findConstructor(type);
+
+            final Parameter[] parameters = constructor.getParameters();
+
+            // recursively get all constructor arguments
+            final List<Object> arguments = Arrays.stream(parameters)
+                    .map(param -> {
+                        if (param.getType().equals(Provider.class)) {
+                            return getProviderArgument(param, type);
+                        } else {
+                            return (Object) getInstance(param.getType(), type);
+                        }
+                    })
+                    .collect(Collectors.toList());
+
+            try {
+                final T newInstance = constructor.newInstance(arguments.toArray());
+
+                markAsInstantiable(type);
+
+                // when the class is marked as singleton it's instance is now added to the singleton map
+                if (isSingleton(type)) {
+                    singletonInstances.put(type, newInstance);
+                }
+
+                return newInstance;
+            } catch (Exception e) {
+                throw new EasyDiException(createErrorMessageStart(type) + "An Exception was thrown while the instantiation.", e);
+            }
+    }
+
+
 
     /**
      * This method is used to define what implementing class should be used for a given interface.
@@ -202,40 +259,7 @@ public class EasyDI{
         return !type.isInterface() && Modifier.isAbstract(type.getModifiers());
     }
 
-    /**
-     * Create a new instance of the given type.
-     */
-    private <T> T createNewInstance(Class<T> type) {
-        final Constructor<T> constructor = findConstructor(type);
 
-        final Parameter[] parameters = constructor.getParameters();
-
-        // recursively get all constructor arguments
-        final List<Object> arguments = Arrays.stream(parameters)
-            .map(param -> {
-                if (param.getType().equals(Provider.class)) {
-                    return getProviderArgument(param, type);
-                } else {
-                    return (Object) getInstance(param.getType());
-                }
-            })
-            .collect(Collectors.toList());
-
-        try {
-            final T newInstance = constructor.newInstance(arguments.toArray());
-
-            markAsInstantiable(type);
-
-            // when the class is marked as singleton it's instance is now added to the singleton map
-            if (isSingleton(type)) {
-                singletonInstances.put(type, newInstance);
-            }
-
-            return newInstance;
-        } catch (Exception e) {
-            throw new IllegalStateException(createErrorMessageStart(type) + "An Exception was thrown while the instantiation.", e);
-        }
-    }
 
     /**
      * This method is used to create a {@link javax.inject.Provider} instance when such a provider
@@ -253,7 +277,7 @@ public class EasyDI{
 
             return () -> EasyDI.this.getInstance((Class) providerType);
         } else {
-            throw new IllegalStateException(createErrorMessageStart(requestedType) +
+            throw new EasyDiException(createErrorMessageStart(requestedType) +
                 "There is a javax.inject.Provider without a type parameter declared as dependency. "
                 + "When using javax.inject.Provider as dependency "
                 + "you need to define a type parameter for this provider!");
@@ -289,7 +313,7 @@ public class EasyDI{
 
             return provider.get();
         } catch (Exception e) {
-            throw new IllegalStateException(createErrorMessageStart(type) + "An Exception was thrown by the provider.", e);
+            throw new EasyDiException(createErrorMessageStart(type) + "An Exception was thrown by the provider.", e);
         }
 
     }
@@ -315,7 +339,7 @@ public class EasyDI{
         final Constructor<?>[] constructors = type.getConstructors();
 
         if (constructors.length == 0) {
-            throw new IllegalStateException(createErrorMessageStart(type) +
+            throw new EasyDiException(createErrorMessageStart(type) +
                 "The class has no public constructor.");
         }
 
@@ -327,7 +351,7 @@ public class EasyDI{
                 .collect(Collectors.toList());
 
             if (constructorsWithInject.size() != 1) {
-                throw new IllegalStateException(createErrorMessageStart(type) +
+                throw new EasyDiException(createErrorMessageStart(type) +
                     "There are more than one public constructors so I don't know which to use. " +
                     "Fix this by either make only one constructor public " +
                     "or annotate exactly one constructor with the javax.inject.Inject annotation.");
