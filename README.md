@@ -328,6 +328,15 @@ EasyDI context = new EasyDI();
 context.bindProvider(EasyDI.class, ()-> context);
 ```
 
+or
+
+```
+EasyDI context = new EasyDI();
+context.bindInstance(EasyDI.class, context);
+```
+
+
+
 Then you can inject `EasyDI` in you classes:
 
 
@@ -354,16 +363,57 @@ public class Example {
 **Be aware that there are some drawbacks/characteristics with this approach you should keep in mind:**
 
 - It's harder to reason about your code because the instantiation of classes may be delayed.
-- It may be harder to reason about your EasyDI configuration as it's now possible make configurations in other classes too
+- It may be harder to reason about your EasyDI configuration as it's now possible make configurations in other classes besides the main class.
 - You have a Dependency (`import`) to the EasyDI library in your business code.
 This makes it harder to change the dependency library afterwards.
-- If you forget the `bindProvider` configuration you will get a new context instance injected everytime as the `EasyDI` class isn't marked as singleton. This has several consequences: 
+- If you forget the `bindProvider` configuration you will get a new context instance injected every time because the `EasyDI` class isn't marked as singleton. This has several consequences:
   - The new instance of EasyDI has no configuration. It's a totally different instance as the root context. NO configuration will be inherited from the root context.
   - The scope of the singleton configuration is limited to a single context. When there are two contexts it's possible that there two instances of a class that was marked as singleton in your application!
 
 
 **Therefore it's generally not recommended to inject `EasyDÌ` in your classes**. It should only be the last choice when there
 is no other option for your use case.
+
+
+
+If you still need the possibility to get instances from the dependency injection container in your business code you should probably use this approach:
+
+```
+public static interface InstanceProvider {
+    <T> T getInstance(Class<T> type);
+}
+
+
+
+// in your main class
+
+EasyDI context = new EasyDI();
+context.bindProvider(InstanceProvider.class, () -> context::getInstance);
+
+
+
+// in your business code
+public class Example {
+
+    private InstanceProvider context;
+
+    public Example(InstanceProvider context){
+        this.context = context;
+    }
+
+    public void doSomething(){
+        Other other = context.getInstance(Other.class);
+        ...
+    }
+}
+```
+
+This approach has some advantages over the previous one:
+- no dependency to the EasyDI library in your business code anymore. This way switching to another DI library in the future should be easier.
+- It's not possible to (accidentally) re-configure the EasyDI context outside of your main class.
+- No way to mess up the singleton scope anymore.
+If you forget the `bindProvider` configuration in the example you will now get an expressive error message that there is no provider for the interface `InstanceProvider` found.
+
 
 
 
