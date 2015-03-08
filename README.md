@@ -316,6 +316,29 @@ With lazy injection it's likely that it will be harder to reason about your code
 point in time an instance of your class will be created.
 
 
+
+### Bind instances
+
+In some use cases you like to define that one specific instance is injected every time the given
+type is requested. This is like a singleton configuration only that you define the exact instance on your own instead
+of only defining that the given type is a singleton and let EasyDI create the instance.
+
+```java
+Engine engine = new Engine();
+easyDI.bindInstance(Engine.class, engine);
+```
+
+This is a shortcut for this:
+
+```java
+Engine engine = new Engine();
+easyDI.bindProvider(Engine.class, () -> engine);
+```
+
+The `bindInstance` method can also be used to configure instances for interfaces or abstract classes.
+
+
+
 ### Inject EasyDI context
 
 In some use cases you like to have access to the EasyDI instance in one of your
@@ -323,14 +346,14 @@ classes to be able to get other instances at runtime.
 
 To achieve this use this config:
 
-```
+```java
 EasyDI context = new EasyDI();
 context.bindProvider(EasyDI.class, ()-> context);
 ```
 
 or
 
-```
+```java
 EasyDI context = new EasyDI();
 context.bindInstance(EasyDI.class, context);
 ```
@@ -340,7 +363,7 @@ context.bindInstance(EasyDI.class, context);
 Then you can inject `EasyDI` in you classes:
 
 
-```
+```java
 Example.java:
 
 public class Example {
@@ -378,7 +401,7 @@ is no other option for your use case.
 
 If you still need the possibility to get instances from the dependency injection container in your business code you should probably use this approach:
 
-```
+```java
 public static interface InstanceProvider {
     <T> T getInstance(Class<T> type);
 }

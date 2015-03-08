@@ -36,7 +36,7 @@ public class EasyDI{
     private Map<Class, Object> singletonInstances = new HashMap<>();
 
     /**
-     * A set of classes that are marked to be treaded as singleton even if they aren't annotated as singleton.
+     * A set of classes that are marked to be treated as singleton even if they aren't annotated as singleton.
      */
     private Set<Class> singletonClasses = new HashSet<>();
 
@@ -63,7 +63,6 @@ public class EasyDI{
     public <T> T getInstance(Class<T> requestedType) {
         return getInstance(requestedType, null);
     }
-
 
     @SuppressWarnings("unchecked")
     private <T> T getInstance(Class<T> requestedType, Class<?> parent){
@@ -230,6 +229,23 @@ public class EasyDI{
         providers.put(classType, provider);
     }
 
+
+    /**
+     * This method is used to define an instance that is used every time the given
+     * class type is requested.
+     *
+     * This way the given instance is effectively a singleton.
+     *
+     * This method can also be used to define instances for interfaces or abstract classes
+     * that otherwise couldn't be instantiated without further configuration.
+     *
+     * @param classType the class type for that the instance will be bound.
+     * @param instance the instance that will be bound.
+     * @param <T> the generic type of the class.
+     */
+    public <T> void bindInstance(Class<T> classType, T instance) {
+        bindProvider(classType, ()-> instance);
+    }
 
     /**
      * This method can be used to mark a class as singleton.
