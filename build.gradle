@@ -1,6 +1,7 @@
 apply plugin: "java"
 apply plugin: 'sonar-runner'
 apply plugin: "jacoco"
+apply plugin: "java-library-distribution"
 
 
 task wrapper(type: Wrapper) {
@@ -14,6 +15,20 @@ group = "eu.lestard"
 version = "0.3.0"
 
 apply from: "maven_upload.gradle"
+
+
+// Create Distribution ZIP with './gradlew distZip'
+
+distributions {
+    main {
+        baseName = "easy-di"
+        contents {
+            from {'README.md'}
+            from {'LICENSE.md'}
+        }
+    }
+}
+
 
 
 
