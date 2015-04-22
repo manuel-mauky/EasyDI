@@ -18,7 +18,7 @@ If you like to use dependency injection (which is always a good idea) but EasyDI
 
 ## Links
 
-[JavaDoc 0.2.0](https://lestard.github.io/EasyDI/docs/0.2.0/eu/lestard/easydi/EasyDI.html)
+[JavaDoc 0.3.0](https://lestard.github.io/EasyDI/docs/0.3.0/eu/lestard/easydi/EasyDI.html)
 
 
 ##<a name="dependencies"></a> Maven Dependencies
@@ -35,7 +35,7 @@ repositories {
 }
 
 dependencies {
-    compile 'eu.lestard:easy-di:0.2.0'
+    compile 'eu.lestard:easy-di:0.3.0'
 }
 ```
 
@@ -45,7 +45,7 @@ dependencies {
 <dependency>
     <groupId>eu.lestard</groupId>
     <artifactId>easy-di</artifactId>
-    <version>0.2.0</version>
+    <version>0.3.0</version>
 </dependency>
 ```
 
@@ -63,7 +63,7 @@ repositories {
 }
 
 dependencies {
-    compile 'eu.lestard:easy-di:0.3.0-SNAPSHOT'
+    compile 'eu.lestard:easy-di:0.4.0-SNAPSHOT'
 }
 ```
 
@@ -73,7 +73,7 @@ dependencies {
 <dependency>
     <groupId>eu.lestard</groupId>
     <artifactId>easy-di</artifactId>
-    <version>0.3.0-SNAPSHOT</version>
+    <version>0.4.0-SNAPSHOT</version>
 </dependency>
 ```
 
@@ -99,9 +99,9 @@ The code for this example is located in the test source directory:
 
 There are two ways of using the library in your project:
 
-1. Download the JAR file and add it to the classpath of your project. Additionally you will need [javax.inject](http://search.maven.org/#artifactdetails|javax.inject|javax.inject|1|jar) (can be downloaded from [here](http://search.maven.org/remotecontent?filepath=javax/inject/javax.inject/1/javax.inject-1.jar))
-2. Use a Build-System like Gradle or Maven. **Easy-DI** is available in the Maven Central Repository.
-See [Maven dependencies](#dependencies)
+1. Use a Build-System like Gradle or Maven. **Easy-DI** is available in the [Maven Central Repository](https://search.maven.org/#search|ga|1|easy-di). See [Maven dependencies](#dependencies)
+2. Download the ZIP file from the [github release page](https://github.com/lestard/EasyDI/releases/download/v0.3.0/easy-di-0.3.0.zip). The file contains the library JAR file and the JAR for [javax.inject](http://search.maven.org/#artifactdetails|javax.inject|javax.inject|1|jar) which is needed as dependency. Add both JAR files to the classpath of your project.
+
 
 ### 2. Create your classes
 
