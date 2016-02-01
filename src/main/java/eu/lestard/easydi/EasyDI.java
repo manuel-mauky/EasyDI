@@ -150,7 +150,7 @@ public class EasyDI{
                         if (param.getType().equals(Provider.class)) {
                             return getProviderArgument(param, type);
                         } else {
-                            return (Object) getInstance(param.getType(), type);
+                            return getInstance(param.getType(), type);
                         }
                     })
                     .collect(Collectors.toList());
@@ -186,6 +186,13 @@ public class EasyDI{
      * **Hint:** The second parameter has to be an actual implementing class of the interface.
      * It may not be an abstract class!
      *
+     *
+     * Alternatively to this method you can:
+     *
+     * - use the {@link #bindInstance(Class, Object)} method to define an instance of the interface that is used
+     * - use the {@link #bindProvider(Class, Provider)} method to define a provider for this interface.
+     *
+     *
      * @param interfaceType      the class type of the interface.
      * @param implementationType the class type of the implementing class.
      * @param <T>                the generic type of the interface.
@@ -217,8 +224,8 @@ public class EasyDI{
      *
      *
      * Providers can be combined with {@link javax.inject.Singleton}'s.
-     * When a type is marked as singleton (has the annotation {@link javax.inject.Singleton} and there is a provider
-     * defined for this type, then this provider will only executed exactly one time when the type is requested the
+     * When a type is marked as singleton (has the annotation {@link javax.inject.Singleton}) and there is a provider
+     * defined for this type, then this provider will only be executed exactly one time when the type is requested the
      * first time.
      *
      * @param classType the type of the class for which the provider is used.

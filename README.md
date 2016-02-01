@@ -399,7 +399,11 @@ is no other option for your use case.
 
 
 
-If you still need the possibility to get instances from the dependency injection container in your business code you should probably use this approach:
+If you need to get instances from the dependency injection container in your business code you should use a `Provider` as 
+constructor argument with the generic type of the classes you want to get. See the [Lazy Injection](#lazy-injection--lazy-instantiation) section.
+
+
+If you still need the possibility to get instances of various types in your business code you should probably use this approach:
 
 ```java
 public static interface InstanceProvider {
