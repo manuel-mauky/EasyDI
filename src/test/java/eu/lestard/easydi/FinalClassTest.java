@@ -9,6 +9,17 @@ import static org.assertj.core.api.Assertions.assertThat;
 @DisplayName("Final classes")
 public class FinalClassTest {
 
+    final class Dependency {
+        public Dependency() {}
+    }
+
+    final class Example {
+        Dependency dep;
+        public Example(Dependency dep){
+            this.dep = dep;
+        }
+    }
+
     private EasyDI easyDI;
 
     @BeforeEach
@@ -19,15 +30,10 @@ public class FinalClassTest {
     @Test
     @DisplayName("final class can be instantiated")
     void success_finalClassCanBeInstantiated() {
-
-        final class Example {
-            public Example() {
-            }
-        }
-
-
         final Example instance = easyDI.getInstance(Example.class);
         assertThat(instance).isNotNull();
+
+        assertThat(instance.dep).isNotNull();
     }
 
 }
