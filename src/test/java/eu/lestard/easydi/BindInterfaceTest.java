@@ -114,9 +114,12 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
     @Test
     @DisplayName("fails when second param is also an interface")
     void fail_bindInterface_secondParamIsInterface() {
-        assertThrows(IllegalArgumentException.class, () -> {
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {
             easyDI.bindInterface(SuperInterface.class, SubInterface.class);
         });
+
+        assertThat(exception).hasStackTraceContaining("second argument")
+            .hasStackTraceContaining("type is an interface");
     }
 
 
@@ -126,8 +129,11 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
     @Test
     @DisplayName("fails when second param is an abstract class")
     void fail_bindInterface_secondParamIsAbstractClass() {
-        assertThrows(IllegalArgumentException.class, () -> {
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {
             easyDI.bindInterface(A.class, AbstractA.class);
         });
+
+        assertThat(exception).hasStackTraceContaining("second argument")
+            .hasStackTraceContaining("type is an abstract class");
     }
 }
