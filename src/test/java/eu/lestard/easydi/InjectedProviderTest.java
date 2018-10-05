@@ -1,46 +1,49 @@
 package eu.lestard.easydi;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 
 import javax.inject.Provider;
 
-import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
-public class InjectedProviderTest {
+@DisplayName("Injection of Provider") class InjectedProviderTest {
 
 
     public static class MyDependency {
-        public static boolean constructorCalled = false;
+        static boolean constructorCalled = false;
 
-        public MyDependency(){
+        public MyDependency() {
             constructorCalled = true;
         }
     }
 
     public static class MyClass {
-        public Provider<MyDependency> provider;
+        Provider<MyDependency> provider;
 
-        public MyClass(Provider<MyDependency> provider){
+        public MyClass(Provider<MyDependency> provider) {
             this.provider = provider;
         }
     }
 
     public static class MyFailClass {
 
-        public MyFailClass(Provider provider){
+        public MyFailClass(Provider provider) {
         }
     }
 
     private EasyDI easyDI;
 
-    @Before
-    public void setup(){
+    @BeforeEach
+    void setup() {
         easyDI = new EasyDI();
     }
 
     @Test
-    public void success_provider(){
+    @DisplayName("works. Constructor of provided class is called lazily")
+    void success_provider() {
         MyDependency.constructorCalled = false;
 
         final MyClass myClass = easyDI.getInstance(MyClass.class);
@@ -53,8 +56,13 @@ public class InjectedProviderTest {
         assertThat(myDependency).isNotNull();
     }
 
-    @Test(expected = IllegalStateException.class)
-    public void fail_provider_without_type(){
-        easyDI.getInstance(MyFailClass.class);
+    @Test
+    @DisplayName("fails when no Type is declared for Provider")
+    void fail_provider_without_type() {
+        IllegalStateException exception = assertThrows(IllegalStateException.class, () -> {
+            easyDI.getInstance(MyFailClass.class);
+        });
+
+        assertThat(exception).hasStackTraceContaining("Provider without a type parameter");
     }
 }

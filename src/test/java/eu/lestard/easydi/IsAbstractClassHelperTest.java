@@ -1,20 +1,25 @@
 package eu.lestard.easydi;
 
-import org.junit.Test;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-public class IsAbstractClassHelperTest {
+@DisplayName("Helper method isAbstractClass") class IsAbstractClassHelperTest {
 
-    public static class MyClass {}
+    private static class MyClass {
+    }
 
-    public static interface MyInterface {}
+    static interface MyInterface {
+    }
 
-    public static abstract class MyAbstractClass {}
+    static abstract class MyAbstractClass {
+    }
 
 
     @Test
-    public void test_isAbstractClass(){
+    @DisplayName("works")
+    void test_isAbstractClass() {
         assertThat(EasyDI.isAbstractClass(MyClass.class)).isFalse();
         assertThat(EasyDI.isAbstractClass(MyInterface.class)).isFalse();
         assertThat(EasyDI.isAbstractClass(MyAbstractClass.class)).isTrue();

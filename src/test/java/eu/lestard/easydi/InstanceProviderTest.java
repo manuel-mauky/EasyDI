@@ -1,7 +1,8 @@
 package eu.lestard.easydi;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 
 import javax.inject.Singleton;
 
@@ -12,13 +13,13 @@ import static org.assertj.core.api.Assertions.assertThat;
  * This test is used to show how one can get an universal provider of instances without
  * directly injecting the EasyDI context itself.
  */
-public class InstanceProviderTest {
+@DisplayName("InstanceProvider as alternative to context-injection") class InstanceProviderTest {
 
-    public static interface InstanceProvider {
+    public interface InstanceProvider {
         <T> T getInstance(Class<T> type);
     }
 
-    public static class Example{
+    public static class Example {
     }
 
     @Singleton
@@ -27,14 +28,15 @@ public class InstanceProviderTest {
 
     private EasyDI context;
 
-    @Before
-    public void setup(){
+    @BeforeEach
+    void setup() {
         context = new EasyDI();
     }
 
     @Test
-    public void success_instanceProvider(){
-        context.bindProvider(InstanceProvider.class, ()-> context::getInstance);
+    @DisplayName("InstanceProvider works for normal class")
+    void success_instanceProvider() {
+        context.bindProvider(InstanceProvider.class, () -> context::getInstance);
 
         final InstanceProvider provider = context.getInstance(InstanceProvider.class);
 
@@ -44,8 +46,9 @@ public class InstanceProviderTest {
     }
 
     @Test
-    public void success_singleton(){
-        context.bindProvider(InstanceProvider.class, ()-> context::getInstance);
+    @DisplayName("InstanceProvider works for singletons")
+    void success_singleton() {
+        context.bindProvider(InstanceProvider.class, () -> context::getInstance);
 
 
         final InstanceProvider provider = context.getInstance(InstanceProvider.class);

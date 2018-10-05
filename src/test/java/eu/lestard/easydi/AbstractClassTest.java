@@ -1,32 +1,44 @@
 package eu.lestard.easydi;
 
-import org.junit.Before;
-import org.junit.Test;
+
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
-public class AbstractClassTest {
+@DisplayName("Abstract Class") class AbstractClassTest {
 
-    public static abstract class AbstractExample{}
+    static abstract class AbstractExample {
+    }
 
-    public class Example extends AbstractExample {}
+    private class Example extends AbstractExample {
+    }
 
 
     private EasyDI easyDI;
 
-    @Before
-    public void setup() throws Exception{
+    @BeforeEach
+    void setup() throws Exception {
         easyDI = new EasyDI();
     }
 
 
-    @Test(expected = IllegalStateException.class)
-    public void fail_abstractClass_withoutProvider(){
-        easyDI.getInstance(AbstractExample.class);
+    @Test
+    @DisplayName("fails without a Provider")
+    void fail_abstractClass_withoutProvider() {
+        IllegalStateException exception = assertThrows(IllegalStateException.class, () -> {
+            easyDI.getInstance(AbstractExample.class);
+        });
+
+        assertThat(exception).hasStackTraceContaining("abstract class")
+            .hasStackTraceContaining("no provider");
     }
 
     @Test
-    public void success_abstractClass_withProvider(){
+    @DisplayName("success with a Provider ")
+    void success_abstractClass_withProvider() {
         easyDI.bindProvider(AbstractExample.class, Example::new);
 
         final AbstractExample instance = easyDI.getInstance(AbstractExample.class);

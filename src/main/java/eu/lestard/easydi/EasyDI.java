@@ -3,8 +3,17 @@ package eu.lestard.easydi;
 import javax.inject.Inject;
 import javax.inject.Provider;
 import javax.inject.Singleton;
-import java.lang.reflect.*;
-import java.util.*;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.Modifier;
+import java.lang.reflect.Parameter;
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
@@ -259,6 +268,8 @@ public class EasyDI{
      *
      * It is an alternative for situations when you can't use the {@link javax.inject.Singleton} annotation.
      * For example when you want a class from a third-party library to be a singleton.
+     *
+     * It is not possible to mark interfaces as singleton.
      *
      * @param type the type that will be marked as singleton.
      */

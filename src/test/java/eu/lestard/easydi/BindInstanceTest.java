@@ -1,32 +1,35 @@
 package eu.lestard.easydi;
 
-import org.junit.Before;
-import org.junit.Test;
+
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-public class BindInstanceTest {
+@DisplayName("Bind Instance") class BindInstanceTest {
 
 
-    public static class Example implements MyInterface{
+    private static class Example implements MyInterface {
     }
 
-    public static interface MyInterface {
+    interface MyInterface {
     }
 
-    public static abstract class AbstractExample {
+    static abstract class AbstractExample {
     }
 
     private EasyDI easyDI;
 
-    @Before
-    public void setup() throws Exception{
+    @BeforeEach
+    void setup() throws Exception {
         easyDI = new EasyDI();
     }
 
 
     @Test
-    public void success_bindInstance(){
+    @DisplayName("works with normal class")
+    void success_bindInstance() {
 
         Example example = new Example();
 
@@ -38,7 +41,8 @@ public class BindInstanceTest {
     }
 
     @Test
-    public void success_interface(){
+    @DisplayName("works with interface")
+    void success_interface() {
         Example example = new Example();
 
         easyDI.bindInstance(MyInterface.class, example);
@@ -49,7 +53,8 @@ public class BindInstanceTest {
     }
 
     @Test
-    public void success_abstractClass(){
+    @DisplayName("works with abstract class")
+    void success_abstractClass() {
 
         AbstractExample example = new AbstractExample() {
         };
