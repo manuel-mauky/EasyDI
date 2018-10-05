@@ -23,7 +23,7 @@ If you like to use dependency injection (which is always a good idea) but EasyDI
 
 ##<a name="dependencies"></a> Maven Dependencies
 
-**Easy-DI** releases are available in the Maven Central Repository.
+**EasyDI** releases are available in the Maven Central Repository.
 You can use it like this:
 
 ### Stable release
@@ -99,7 +99,7 @@ The code for this example is located in the test source directory:
 
 There are two ways of using the library in your project:
 
-1. Use a Build-System like Gradle or Maven. **Easy-DI** is available in the [Maven Central Repository](https://search.maven.org/#search|ga|1|easy-di). See [Maven dependencies](#dependencies)
+1. Use a Build-System like Gradle or Maven. **EasyDI** is available in the [Maven Central Repository](https://search.maven.org/#search|ga|1|easy-di). See [Maven dependencies](#dependencies)
 2. Download the ZIP file from the [github release page](https://github.com/lestard/EasyDI/releases/download/v0.3.0/easy-di-0.3.0.zip). The file contains the library JAR file and the JAR for [javax.inject](http://search.maven.org/#artifactdetails|javax.inject|javax.inject|1|jar) which is needed as dependency. Add both JAR files to the classpath of your project.
 
 
@@ -199,8 +199,7 @@ assertThat(engine).isInstanceOf(ElectricMotor.class);
 
 ### Singletons
 
-By default EasyDI will create new instances every time a dependency is requested. If you like to have only one
-instance of a specific class you have to tell it EasyDI. There are two ways of doing this:
+By default EasyDI will create new instances every time a dependency is requested. If there should only be a single instance of a specific class you have to tell EasyDI. There are two ways of doing this:
 
 #### 1. @Singleton
 
@@ -216,7 +215,7 @@ public class Car {
 #### 2. EasyDI.markAsSingleton()
 
 You can mark a class as singleton with the method `markAsSingleton`. This is useful when you for some reason can't
-modify the source code of the class you want to be a singleton (i.e. when it is part of a third-party library).
+modify the source code of the class (i.e. when it is part of a third-party library).
 
 ```java
 EasyDI easyDI = new EasyDI();
@@ -234,7 +233,7 @@ for this class. There are many use cases where this can be useful:
 - There is no public constructor or there are more than one public constructors and (for some reason) you can't add the `@Inject` annotation
 - The class is implemented with the [classical Singleton design pattern](https://en.wikipedia.org/wiki/Singleton_pattern#Example).
 - You need to make some configuration on the created instance before it can be used for injection.
-- When you like to use abstract classes as dependency (see next section)
+- You like to use abstract classes as dependency (see next section)
 
 ```java
 EasyDI easyDI = new EasyDI();
@@ -277,12 +276,12 @@ When you like to use abstract classes as dependencies you will have to [create a
 ### Lazy injection / lazy instantiation
 
 In some use cases you need an instance of a class but at the time your constructor is called
-this dependency isn't yet available for some reason or it shouldn't be instantiated at this time.
+this dependency isn't available yet or it shouldn't be instantiated at this time.
 Instead you like to retrieve the instance at some later point in time.
 
 Another similar use case is when you need a dependency only under some conditions and the construction of the dependency is expensive.
 
-In both cases **lazy injection** is your friend. Easy-DI can do lazy injection like this:
+In both cases **lazy injection** is your friend. EasyDI can do lazy injection like this:
 
 1. change the type of the constructor parameter from `T` to `javax.inject.Provider<T>`
 2. call the method `get` on the provider instance when you need the actual instance
@@ -307,12 +306,12 @@ public class Car {
 ```
 
 In this example the instance of the `Engine` is only created when the `buildCar` method is called. In this
-case the normal dependency injection mechanism of Easy-DI with all configuration rules described above
+case the normal dependency injection mechanism of EasyDI with all configuration rules described above
 will run and retrieve an instance of `Engine`.
 
 **Recommendation**:
 In general lazy injection should only be the last choice when you really can't inject an instance directly in the constructor.
-With lazy injection it's likely that it will be harder to reason about your code. It's not trivial anymore to tell at which
+Code with lazy injection will typically be harder to reason about. It's not trivial anymore to tell at which
 point in time an instance of your class will be created.
 
 
@@ -391,7 +390,7 @@ public class Example {
 This makes it harder to change the dependency library afterwards.
 - If you forget the `bindProvider` configuration you will get a new context instance injected every time because the `EasyDI` class isn't marked as singleton. This has several consequences:
   - The new instance of EasyDI has no configuration. It's a totally different instance as the root context. NO configuration will be inherited from the root context.
-  - The scope of the singleton configuration is limited to a single context. When there are two contexts it's possible that there two instances of a class that was marked as singleton in your application!
+  - The scope of the singleton configuration is limited to a single context. When there are two contexts it's possible that there are two instances of a class that was marked as singleton in your application!
 
 
 **Therefore it's generally not recommended to inject `EasyDÌ` in your classes**. It should only be the last choice when there
@@ -406,7 +405,7 @@ constructor argument with the generic type of the classes you want to get. See t
 If you still need the possibility to get instances of various types in your business code you should probably use this approach:
 
 ```java
-public static interface InstanceProvider {
+public interface InstanceProvider {
     <T> T getInstance(Class<T> type);
 }
 
