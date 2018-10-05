@@ -18,16 +18,16 @@ import java.util.stream.Collectors;
 
 /**
  * EasyDI main class.
- *
+ * <p>
  * A typical usage looks like this:
- *
+ * <p>
  * ```java
  * EasyDI easyDI = new EasyDI();
- *
+ * <p>
  * MyClass instance = easyDI.getInstance(MyClass.class);
  * ```
  */
-public class EasyDI{
+public class EasyDI {
 
     /**
      * A checklist for all class types that were requested to get instances from.
@@ -65,7 +65,6 @@ public class EasyDI{
      * @param requestedType the class type of which an instance is retrieved.
      * @param <T>           the generic type of the class.
      * @return an instance of the given type.
-     *
      * @throws java.lang.IllegalArgumentException if there is a misconfiguration or a requested class can't be instantiated.
      */
     @SuppressWarnings("unchecked")
@@ -74,7 +73,7 @@ public class EasyDI{
     }
 
     @SuppressWarnings("unchecked")
-    private <T> T getInstance(Class<T> requestedType, Class<?> parent){
+    private <T> T getInstance(Class<T> requestedType, Class<?> parent) {
         try {
             Class<T> type = requestedType;
 
@@ -86,8 +85,8 @@ public class EasyDI{
                     return getInstanceFromProvider(requestedType);
                 } else {
                     throw new EasyDiException(createErrorMessageStart(requestedType)
-                            + "It is an interface and there was no implementation class mapping defined for this type. " +
-                            "Please use the 'bindInterface' method of EasyDI to define what implementing class should be used for a given interface.");
+                        + "It is an interface and there was no implementation class mapping defined for this type. " +
+                        "Please use the 'bindInterface' method of EasyDI to define what implementing class should be used for a given interface.");
                 }
             }
 
@@ -96,8 +95,8 @@ public class EasyDI{
                     return getInstanceFromProvider(requestedType);
                 } else {
                     throw new EasyDiException(createErrorMessageStart(requestedType)
-                            + "It is an abstract class and there is no provider for this class available. " +
-                            "Please define a provider with the `bindProvider` method for this abstract class type.");
+                        + "It is an abstract class and there is no provider for this class available. " +
+                        "Please define a provider with the `bindProvider` method for this abstract class type.");
                 }
             }
 
@@ -132,12 +131,13 @@ public class EasyDI{
             }
 
             return createNewInstance(type, parent);
-        }catch (EasyDiException rootCause){
+        } catch (EasyDiException rootCause) {
             String errorMessage = "EasyDI wasn't able to create your class hierarchy. ";
 
-            if(parent != null) {
+            if (parent != null) {
                 errorMessage += "\nCannot instantiate the class [" + parent.getName() + "]. "
-                        +"At least one of the constructor parameters of type [" + requestedType + "] can't be instantiated. ";
+                    + "At least one of the constructor parameters of type [" + requestedType
+                    + "] can't be instantiated. ";
             }
             errorMessage += "See the root cause exception for a detailed explanation.";
 
@@ -149,58 +149,58 @@ public class EasyDI{
      * Create a new instance of the given type.
      */
     private <T> T createNewInstance(Class<T> type, Class<?> parent) {
-            final Constructor<T> constructor = findConstructor(type);
+        final Constructor<T> constructor = findConstructor(type);
 
-            final Parameter[] parameters = constructor.getParameters();
+        final Parameter[] parameters = constructor.getParameters();
 
-            // recursively get all constructor arguments
-            final List<Object> arguments = Arrays.stream(parameters)
-                    .map(param -> {
-                        if (param.getType().equals(Provider.class)) {
-                            return getProviderArgument(param, type);
-                        } else {
-                            return getInstance(param.getType(), type);
-                        }
-                    })
-                    .collect(Collectors.toList());
-
-            try {
-                final T newInstance = constructor.newInstance(arguments.toArray());
-
-                markAsInstantiable(type);
-
-                // when the class is marked as singleton it's instance is now added to the singleton map
-                if (isSingleton(type)) {
-                    singletonInstances.put(type, newInstance);
+        // recursively get all constructor arguments
+        final List<Object> arguments = Arrays.stream(parameters)
+            .map(param -> {
+                if (param.getType().equals(Provider.class)) {
+                    return getProviderArgument(param, type);
+                } else {
+                    return getInstance(param.getType(), type);
                 }
+            })
+            .collect(Collectors.toList());
 
-                return newInstance;
-            } catch (Exception e) {
-                throw new EasyDiException(createErrorMessageStart(type) + "An Exception was thrown while the instantiation.", e);
+        try {
+            final T newInstance = constructor.newInstance(arguments.toArray());
+
+            markAsInstantiable(type);
+
+            // when the class is marked as singleton it's instance is now added to the singleton map
+            if (isSingleton(type)) {
+                singletonInstances.put(type, newInstance);
             }
+
+            return newInstance;
+        } catch (Exception e) {
+            throw new EasyDiException(
+                createErrorMessageStart(type) + "An Exception was thrown during the instantiation.", e);
+        }
     }
 
 
 
     /**
      * This method is used to define what implementing class should be used for a given interface.
-     *
+     * <p>
      * This way you can use interface types as dependencies in your classes and doesn't have to
      * depend on specific implementations.
-     *
+     * <p>
      * But EasyDI needs to know what implementing class should be used when an interface type is
      * defined as dependency.
-     *
-     *
+     * <p>
+     * <p>
      * **Hint:** The second parameter has to be an actual implementing class of the interface.
      * It may not be an abstract class!
-     *
-     *
+     * <p>
+     * <p>
      * Alternatively to this method you can:
-     *
+     * <p>
      * - use the {@link #bindInstance(Class, Object)} method to define an instance of the interface that is used
      * - use the {@link #bindProvider(Class, Provider)} method to define a provider for this interface.
-     *
      *
      * @param interfaceType      the class type of the interface.
      * @param implementationType the class type of the implementing class.
@@ -211,27 +211,30 @@ public class EasyDI{
     public <T> void bindInterface(Class<T> interfaceType, Class<? extends T> implementationType) {
         if (interfaceType.isInterface()) {
             if (implementationType.isInterface()) {
-                throw new IllegalArgumentException("The given type is an interface. Expecting the second argument to not be an interface but an actual class");
+                throw new IllegalArgumentException(
+                    "The given type is an interface. Expecting the second argument to not be an interface but an actual class");
             } else if (isAbstractClass(implementationType)) {
-                throw new IllegalArgumentException("The given type is an abstract class. Expecting the second argument to be an actual implementing class");
+                throw new IllegalArgumentException(
+                    "The given type is an abstract class. Expecting the second argument to be an actual implementing class");
             } else {
                 interfaceMappings.put(interfaceType, implementationType);
             }
         } else {
-            throw new IllegalArgumentException("The given type is not an interface. Expecting the first argument to be an interface.");
+            throw new IllegalArgumentException(
+                "The given type is not an interface. Expecting the first argument to be an interface.");
         }
     }
 
     /**
      * This method is used to define a {@link javax.inject.Provider} for a given type.
-     *
+     * <p>
      * The type can either be an interface or class type. This is a good way to integrate
      * third-party classes that aren't suitable for injection by default (i.e. have no public constructor...).
-     *
+     * <p>
      * Another use-case is when you need to make some configuration for new instance before it is used for dependency
      * injection.
-     *
-     *
+     * <p>
+     * <p>
      * Providers can be combined with {@link javax.inject.Singleton}'s.
      * When a type is marked as singleton (has the annotation {@link javax.inject.Singleton}) and there is a provider
      * defined for this type, then this provider will only be executed exactly one time when the type is requested the
@@ -249,33 +252,34 @@ public class EasyDI{
     /**
      * This method is used to define an instance that is used every time the given
      * class type is requested.
-     *
+     * <p>
      * This way the given instance is effectively a singleton.
-     *
+     * <p>
      * This method can also be used to define instances for interfaces or abstract classes
      * that otherwise couldn't be instantiated without further configuration.
      *
      * @param classType the class type for that the instance will be bound.
-     * @param instance the instance that will be bound.
-     * @param <T> the generic type of the class.
+     * @param instance  the instance that will be bound.
+     * @param <T>       the generic type of the class.
      */
     public <T> void bindInstance(Class<T> classType, T instance) {
-        bindProvider(classType, ()-> instance);
+        bindProvider(classType, () -> instance);
     }
 
     /**
      * This method can be used to mark a class as singleton.
-     *
+     * <p>
      * It is an alternative for situations when you can't use the {@link javax.inject.Singleton} annotation.
      * For example when you want a class from a third-party library to be a singleton.
-     *
+     * <p>
      * It is not possible to mark interfaces as singleton.
      *
      * @param type the type that will be marked as singleton.
      */
     public void markAsSingleton(Class type) {
         if (type.isInterface()) {
-            throw new IllegalArgumentException("The given type is an interface. Expecting the param to be an actual class");
+            throw new IllegalArgumentException(
+                "The given type is an interface. Expecting the param to be an actual class");
         }
 
         singletonClasses.add(type);
@@ -354,13 +358,13 @@ public class EasyDI{
 
     /**
      * Find out the constructor that will be used for instantiation.
-     *
+     * <p>
      * If there is only one public constructor, it will be used.
-     *
+     * <p>
      * If there are more then one public constructors, the one with an {@link javax.inject.Inject}
      * annotation is used.
-     *
-     *
+     * <p>
+     * <p>
      * In all other cases an {@link java.lang.IllegalStateException} is thrown.
      *
      * @param type the class of which the constructor is searched for.
@@ -384,9 +388,17 @@ public class EasyDI{
                 .filter(c -> c.isAnnotationPresent(Inject.class))
                 .collect(Collectors.toList());
 
+            if (constructorsWithInject.isEmpty()) {
+                throw new EasyDiException(createErrorMessageStart(type) +
+                    "There is more than one public constructor defined so I don't know which one to use. "
+                    + "Fix this by either make only one constructor public " +
+                    "or annotate exactly one constructor with the javax.inject.Inject annotation.");
+            }
+
             if (constructorsWithInject.size() != 1) {
                 throw new EasyDiException(createErrorMessageStart(type) +
-                    "There are more than one public constructors so I don't know which to use. " +
+                    "There is more than one public constructor marked with @Inject so I don't know which one to use. "
+                    +
                     "Fix this by either make only one constructor public " +
                     "or annotate exactly one constructor with the javax.inject.Inject annotation.");
             }

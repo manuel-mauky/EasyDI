@@ -52,7 +52,7 @@ public class ConstructorsTest {
                 easyDI.getInstance(Example.class);
             });
 
-            assertThat(exception).hasStackTraceContaining("more than one public constructors");
+            assertThat(exception).hasStackTraceContaining("more than one public constructor defined");
         }
 
         @Test
@@ -71,6 +71,8 @@ public class ConstructorsTest {
             IllegalStateException exception = assertThrows(IllegalStateException.class, () -> {
                 easyDI.getInstance(Example.class);
             });
+
+            assertThat(exception).hasStackTraceContaining("@Inject");
         }
 
 
@@ -171,7 +173,7 @@ public class ConstructorsTest {
             easyDI.getInstance(Example.class);
         });
 
-        assertThat(exception).hasStackTraceContaining("Exception was thrown while the instantiation");
+        assertThat(exception).hasStackTraceContaining("Exception was thrown during the instantiation");
     }
 
 }
