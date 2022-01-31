@@ -1,0 +1,1 @@
+packageSearchIndex = [{"l":"All Packages","u":"allpackages-index.html"},{"m":"eu.lestard.easydi","l":"eu.lestard.easydi"}];updateSearchResults();

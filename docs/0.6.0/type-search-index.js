@@ -1,0 +1,1 @@
+typeSearchIndex = [{"l":"All Classes and Interfaces","u":"allclasses-index.html"},{"p":"eu.lestard.easydi","l":"EasyDI"},{"p":"eu.lestard.easydi","l":"EasyDiException"}];updateSearchResults();
