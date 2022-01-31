@@ -1,8 +1,9 @@
 package eu.lestard.easydi;
 
-import javax.inject.Inject;
-import javax.inject.Provider;
-import javax.inject.Singleton;
+import jakarta.inject.Inject;
+import jakarta.inject.Provider;
+import jakarta.inject.Singleton;
+
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.Parameter;
@@ -14,50 +15,49 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 /**
  * EasyDI main class.
- * <p>
+ *<p>
  * A typical usage looks like this:
- * <p>
- * ```java
+ *
+ * <pre>{@code
  * EasyDI easyDI = new EasyDI();
- * <p>
+ *
  * MyClass instance = easyDI.getInstance(MyClass.class);
- * ```
+ * }</pre>
  */
 public class EasyDI {
 
     /**
      * A checklist for all class types that were requested to get instances from.
      */
-    private Set<Class> requestedClasses = new HashSet<>();
+    private final Set<Class<?>> requestedClasses = new HashSet<>();
 
     /**
      * A checklist with all class types that were successfully instantiated.
      */
-    private Set<Class> instantiableClasses = new HashSet<>();
+    private final Set<Class<?>> instantiableClasses = new HashSet<>();
 
     /**
      * A map with all classes that are marked as singleton and the actual singleton instance.
      */
-    private Map<Class, Object> singletonInstances = new HashMap<>();
+    private final Map<Class<?>, Object> singletonInstances = new HashMap<>();
 
     /**
      * A set of classes that are marked to be treated as singleton even if they aren't annotated as singleton.
      */
-    private Set<Class> singletonClasses = new HashSet<>();
+    private final Set<Class<?>> singletonClasses = new HashSet<>();
 
     /**
      * This map stores the implementation type (value) that should be used for an interface type (key).
      */
-    private Map<Class, Class> interfaceMappings = new HashMap<>();
+    private final Map<Class<?>, Class> interfaceMappings = new HashMap<>();
 
     /**
      * This map stores providers for given class types.
      */
-    private Map<Class, Provider> providers = new HashMap<>();
+    private final Map<Class<?>, Provider> providers = new HashMap<>();
 
     /**
      * Get an instance of the given class type.
@@ -155,14 +155,13 @@ public class EasyDI {
 
         // recursively get all constructor arguments
         final List<Object> arguments = Arrays.stream(parameters)
-            .map(param -> {
-                if (param.getType().equals(Provider.class)) {
-                    return getProviderArgument(param, type);
-                } else {
-                    return getInstance(param.getType(), type);
-                }
-            })
-            .collect(Collectors.toList());
+                .map(param -> {
+                    if (param.getType().equals(Provider.class)) {
+                        return getProviderArgument(param, type);
+                    } else {
+                        return getInstance(param.getType(), type);
+                    }
+                }).toList();
 
         try {
             final T newInstance = constructor.newInstance(arguments.toArray());
@@ -188,19 +187,24 @@ public class EasyDI {
      * <p>
      * This way you can use interface types as dependencies in your classes and doesn't have to
      * depend on specific implementations.
-     * <p>
+     *<p>
      * But EasyDI needs to know what implementing class should be used when an interface type is
      * defined as dependency.
      * <p>
-     * <p>
-     * **Hint:** The second parameter has to be an actual implementing class of the interface.
+     *
+     * <strong>Hint:</strong> The second parameter has to be an actual implementing class of the interface.
      * It may not be an abstract class!
-     * <p>
-     * <p>
+     *
+     *<p>
      * Alternatively to this method you can:
-     * <p>
-     * - use the {@link #bindInstance(Class, Object)} method to define an instance of the interface that is used
-     * - use the {@link #bindProvider(Class, Provider)} method to define a provider for this interface.
+     *  <ul>
+     *      <li>
+     * use the {@link #bindInstance(Class, Object)} method to define an instance of the interface that is used
+     *      </li>
+     *      <li>
+     * use the {@link #bindProvider(Class, Provider)} method to define a provider for this interface.
+     *      </li>
+     *  </ul>
      *
      * @param interfaceType      the class type of the interface.
      * @param implementationType the class type of the implementing class.
@@ -226,17 +230,17 @@ public class EasyDI {
     }
 
     /**
-     * This method is used to define a {@link javax.inject.Provider} for a given type.
-     * <p>
+     * This method is used to define a {@link jakarta.inject.Provider} for a given type.
+     *<p>
      * The type can either be an interface or class type. This is a good way to integrate
      * third-party classes that aren't suitable for injection by default (i.e. have no public constructor...).
-     * <p>
+     *<p>
      * Another use-case is when you need to make some configuration for new instance before it is used for dependency
      * injection.
-     * <p>
-     * <p>
-     * Providers can be combined with {@link javax.inject.Singleton}'s.
-     * When a type is marked as singleton (has the annotation {@link javax.inject.Singleton}) and there is a provider
+     *<p>
+     *
+     * Providers can be combined with {@link jakarta.inject.Singleton}'s.
+     * When a type is marked as singleton (has the annotation {@link jakarta.inject.Singleton}) and there is a provider
      * defined for this type, then this provider will only be executed exactly one time when the type is requested the
      * first time.
      *
@@ -252,9 +256,9 @@ public class EasyDI {
     /**
      * This method is used to define an instance that is used every time the given
      * class type is requested.
-     * <p>
+     *<p>
      * This way the given instance is effectively a singleton.
-     * <p>
+     *<p>
      * This method can also be used to define instances for interfaces or abstract classes
      * that otherwise couldn't be instantiated without further configuration.
      *
@@ -268,10 +272,10 @@ public class EasyDI {
 
     /**
      * This method can be used to mark a class as singleton.
-     * <p>
-     * It is an alternative for situations when you can't use the {@link javax.inject.Singleton} annotation.
+     *<p>
+     * It is an alternative for situations when you can't use the {@link jakarta.inject.Singleton} annotation.
      * For example when you want a class from a third-party library to be a singleton.
-     * <p>
+     *<p>
      * It is not possible to mark interfaces as singleton.
      *
      * @param type the type that will be marked as singleton.
@@ -287,11 +291,11 @@ public class EasyDI {
 
 
     /**
-     * This helper method returns `true` only if the given
+     * This helper method returns {@code true} only if the given
      * class type is an abstract class.
      *
      * @param type the class type to check
-     * @return `true` if the given type is an abstract class, otherwise `false`
+     * @return  {@code true} if the given type is an abstract class, otherwise  {@code false}
      */
     static boolean isAbstractClass(Class type) {
         return !type.isInterface() && Modifier.isAbstract(type.getModifiers());
@@ -300,7 +304,7 @@ public class EasyDI {
 
 
     /**
-     * This method is used to create a {@link javax.inject.Provider} instance when such a provider
+     * This method is used to create a {@link jakarta.inject.Provider} instance when such a provider
      * is declared as constructor parameter.
      *
      * @param param         the parameter declared by the constructor
@@ -308,8 +312,7 @@ public class EasyDI {
      * @return the created provider.
      */
     private Provider getProviderArgument(Parameter param, Class requestedType) {
-        if (param.getParameterizedType() instanceof ParameterizedType) {
-            ParameterizedType typeParam = (ParameterizedType) param.getParameterizedType();
+        if (param.getParameterizedType() instanceof ParameterizedType typeParam) {
 
             final Type providerType = typeParam.getActualTypeArguments()[0];
 
@@ -341,8 +344,7 @@ public class EasyDI {
 
     /**
      * Get an instance of the given type from a provider. This method takes care for Exception handling when the
-     * provider
-     * throws an exception.
+     * provider throws an exception.
      */
     @SuppressWarnings("unchecked")
     private <T> T getInstanceFromProvider(Class<T> type) {
@@ -358,13 +360,13 @@ public class EasyDI {
 
     /**
      * Find out the constructor that will be used for instantiation.
-     * <p>
+     *<p>
      * If there is only one public constructor, it will be used.
-     * <p>
-     * If there are more then one public constructors, the one with an {@link javax.inject.Inject}
+     *<p>
+     * If there are more then one public constructors, the one with an {@link jakarta.inject.Inject}
      * annotation is used.
-     * <p>
-     * <p>
+     *<p>
+     *
      * In all other cases an {@link java.lang.IllegalStateException} is thrown.
      *
      * @param type the class of which the constructor is searched for.
@@ -384,9 +386,8 @@ public class EasyDI {
         if (constructors.length > 1) {
 
             final List<Constructor<?>> constructorsWithInject = Arrays
-                .stream(constructors)
-                .filter(c -> c.isAnnotationPresent(Inject.class))
-                .collect(Collectors.toList());
+                    .stream(constructors)
+                    .filter(c -> c.isAnnotationPresent(Inject.class)).toList();
 
             if (constructorsWithInject.isEmpty()) {
                 throw new EasyDiException(createErrorMessageStart(type) +

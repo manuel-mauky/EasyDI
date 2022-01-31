@@ -7,7 +7,8 @@ import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-@DisplayName("Bind Instance") class BindInstanceTest {
+@DisplayName("Bind Instance")
+class BindInstanceTest {
 
 
     private static class Example implements MyInterface {

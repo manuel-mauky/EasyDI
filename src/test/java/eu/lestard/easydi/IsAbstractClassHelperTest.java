@@ -5,7 +5,8 @@ import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-@DisplayName("Helper method isAbstractClass") class IsAbstractClassHelperTest {
+@DisplayName("Helper method isAbstractClass")
+class IsAbstractClassHelperTest {
 
     private static class MyClass {
     }

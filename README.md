@@ -5,23 +5,22 @@
 **EasyDI** is a small dependency injection (DI) library for java projects.
 
 It's designed for small projects that don't need a full-blown DI-framework.
-To be as easy as possible EasyDI has less features compared to other DI frameworks and some limitations:
+To be as easy as possible EasyDI has fewer features compared to other DI frameworks and some limitations:
 
 - Only constructor injection is supported, **no** setter/field injection
 - No `PostConstruct` or `PreDestroy`
-- Uses some JSR-330 annotations (`javax.inject.*`) but is **not** a compliant implementation of JSR-330
-- Java 8 only
+- Uses some JSR-330 annotations (`jakarta.inject.*`, formerly `javax.inject.*`) but is **not** a compliant implementation of JSR-330
 
-If you like to use dependency injection (which is always a good idea) but EasyDI doesn't fit your needs
+If you like to use dependency injection but EasyDI doesn't fit your needs
  you might want to try other DI frameworks like [CDI](http://www.cdi-spec.org/), [Guice](https://github.com/google/guice)
  or [Dagger](https://square.github.io/dagger/).
 
 ## Links
 
-[JavaDoc 0.3.0](https://lestard.github.io/EasyDI/docs/0.3.0/eu/lestard/easydi/EasyDI.html)
+[JavaDoc 0.6.0](https://lestard.github.io/EasyDI/docs/0.6.0/eu/lestard/easydi/EasyDI.html)
 
 
-##<a name="dependencies"></a> Maven Dependencies
+## Maven Dependencies
 
 **EasyDI** releases are available in the Maven Central Repository.
 You can use it like this:
@@ -29,13 +28,14 @@ You can use it like this:
 ### Stable release
 
 #### Gradle
+
 ```groovy
 repositories {
     mavenCentral()
 }
 
 dependencies {
-    compile 'eu.lestard:easy-di:0.3.0'
+    compile 'eu.lestard:easy-di:0.6.0'
 }
 ```
 
@@ -45,7 +45,7 @@ dependencies {
 <dependency>
     <groupId>eu.lestard</groupId>
     <artifactId>easy-di</artifactId>
-    <version>0.3.0</version>
+    <version>0.6.0</version>
 </dependency>
 ```
 
@@ -63,7 +63,7 @@ repositories {
 }
 
 dependencies {
-    compile 'eu.lestard:easy-di:0.4.0-SNAPSHOT'
+    compile 'eu.lestard:easy-di:0.7.0-SNAPSHOT'
 }
 ```
 
@@ -73,7 +73,7 @@ dependencies {
 <dependency>
     <groupId>eu.lestard</groupId>
     <artifactId>easy-di</artifactId>
-    <version>0.4.0-SNAPSHOT</version>
+    <version>0.7.0-SNAPSHOT</version>
 </dependency>
 ```
 

@@ -4,7 +4,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-import javax.inject.Singleton;
+import jakarta.inject.Singleton;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -12,7 +12,8 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 /**
  * This test is used to verify the behaviour of EasyDI dealing with interfaces.
  */
-@DisplayName("Bind Interface") class BindInterfaceTest {
+@DisplayName("Bind Interface")
+class BindInterfaceTest {
 
     interface A {
     }

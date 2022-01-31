@@ -4,7 +4,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-import javax.inject.Singleton;
+import jakarta.inject.Singleton;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -13,7 +13,8 @@ import static org.assertj.core.api.Assertions.assertThat;
  * This test is used to show how one can get an universal provider of instances without
  * directly injecting the EasyDI context itself.
  */
-@DisplayName("InstanceProvider as alternative to context-injection") class InstanceProviderTest {
+@DisplayName("InstanceProvider as alternative to context-injection")
+class InstanceProviderTest {
 
     public interface InstanceProvider {
         <T> T getInstance(Class<T> type);

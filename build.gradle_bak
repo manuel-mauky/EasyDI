@@ -1,0 +1,108 @@
+buildscript {
+    repositories {
+        mavenCentral()
+        jcenter()
+    }
+    dependencies {
+        classpath "ch.raffael.markdown-doclet:markdown-doclet:1.4"
+    }
+}
+
+//apply plugin: "ch.raffael.markdown-doclet"
+
+
+apply plugin: "java"
+apply plugin: "java-library-distribution"
+
+
+
+group = "eu.lestard"
+version = "1.0"
+
+apply from: "maven_upload.gradle"
+
+
+// Create Distribution ZIP with './gradlew distZip'
+
+distributions {
+    main {
+        baseName = "easy-di"
+        contents {
+            from {'README.md'}
+            from {'LICENSE.md'}
+        }
+    }
+}
+
+ext.moduleName = 'eu.lestard.easydi'
+
+
+sourceCompatibility = JavaVersion.VERSION_1_8
+targetCompatibility = JavaVersion.VERSION_1_8
+
+
+sourceSets {
+    moduleInfo {
+        java {
+            srcDir 'src/module-info/java'
+        }
+    }
+}
+
+
+compileModuleInfoJava {
+    sourceCompatibility = JavaVersion.VERSION_1_9
+    targetCompatibility = JavaVersion.VERSION_1_9
+
+    inputs.property("moduleName", moduleName)
+
+    doFirst {
+        classpath += sourceSets.main.compileClasspath
+
+        options.compilerArgs = [
+                '--module-path', classpath.asPath,
+                '-d', sourceSets.main.output.classesDirs.asPath
+        ]
+    }
+}
+
+jar {
+    manifest {
+        attributes("Automatic-Module-Name": moduleName)
+    }
+    from sourceSets.main.output
+    from sourceSets.moduleInfo.output
+}
+
+repositories {
+    mavenLocal()
+    mavenCentral()
+    maven{
+        url "https://oss.sonatype.org/content/repositories/snapshots/"
+    }
+}
+
+configurations {
+    markdownDoclet
+}
+
+dependencies {
+    compile 'javax.inject:javax.inject:1'
+
+    // testing
+    testCompile "org.junit.jupiter:junit-jupiter-api:5.3.1"
+    testRuntime "org.junit.jupiter:junit-jupiter-engine:5.3.1"
+    testCompile "org.assertj:assertj-core:3.11.1"
+
+    markdownDoclet "ch.raffael.markdown-doclet:markdown-doclet:1.4"
+}
+
+
+
+javadoc.options {
+    links "http://docs.oracle.com/javase/8/docs/api/", "http://docs.oracle.com/javaee/6/api"
+
+    docletpath = configurations.markdownDoclet.files.asType(List)
+    doclet = "ch.raffael.mddoclet.MarkdownDoclet"
+    addStringOption("parse-timeout", "10")
+}

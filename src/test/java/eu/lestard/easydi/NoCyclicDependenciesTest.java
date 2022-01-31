@@ -7,7 +7,8 @@ import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-@DisplayName("Test for non-cyclic dependencies") class NoCyclicDependenciesTest {
+@DisplayName("Test for non-cyclic dependencies")
+class NoCyclicDependenciesTest {
 
     public static class Root {
         public Root(DepOne depOne, DepThree depThree) {

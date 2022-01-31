@@ -8,7 +8,8 @@ import org.junit.jupiter.api.Test;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-@DisplayName("Cyclic dependencies") class CyclicDependenciesTest {
+@DisplayName("Cyclic dependencies")
+class CyclicDependenciesTest {
 
     public static class Root {
         public Root(DepOne depOne) {

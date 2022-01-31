@@ -4,12 +4,13 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-import javax.inject.Provider;
+import jakarta.inject.Provider;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-@DisplayName("Injection of Provider") class InjectedProviderTest {
+@DisplayName("Injection of Provider")
+class InjectedProviderTest {
 
 
     public static class MyDependency {
